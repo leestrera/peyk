@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+:root {
+  --background: #09090b; /* Obsidian / Zinc 950 */
+  --foreground: #ffffff;
+  
+  --color-amber: #f59e0b;
+  --color-glass: rgba(255, 255, 255, 0.08);
+}
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-peyk-amber: var(--color-amber);
+  --color-peyk-glass: var(--color-glass);
+
+  --font-sans: var(--font-jakarta), sans-serif;
+  --font-mono: var(--font-jetbrains), monospace;
+  --font-heading: var(--font-space), sans-serif;
+  --font-cursive: var(--font-alex), cursive;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+/* Base custom cursor hidden logic */
+@media (hover: none) {
+  .custom-cursor {
+    display: none !important;
+  }
+}
