@@ -4,19 +4,20 @@
   --background: #09090b; /* Obsidian / Zinc 950 */
   --foreground: #ffffff;
   
-  --color-amber: #f59e0b;
+  --color-silver: #e2e8f0; /* Pure White / Silver Accent */
   --color-glass: rgba(255, 255, 255, 0.08);
 }
 
 @theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-peyk-amber: var(--color-amber);
+  --color-peyk-silver: var(--color-silver);
   --color-peyk-glass: var(--color-glass);
 
-  --font-sans: var(--font-jakarta), sans-serif;
-  --font-mono: var(--font-jetbrains), monospace;
-  --font-heading: var(--font-space), sans-serif;
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, monospace;
+  --font-heading: var(--font-space), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-playfair), ui-serif, Georgia, serif;
   --font-cursive: var(--font-alex), cursive;
 }
 
@@ -30,4 +31,105 @@ body {
   .custom-cursor {
     display: none !important;
   }
+}
+
+/* Hide scrollbar for elements with .no-scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Cinematic Film Grain Noise */
+.bg-noise::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.025;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* =========================================
+   Physics Nav Rope (Lanyard)
+========================================= */
+
+.nav-pull-string {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transform-origin: top center;
+  will-change: transform;
+}
+
+.lanyard-thread {
+  width: 1px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.15);
+  transform-origin: top;
+  will-change: height;
+}
+
+.lanyard-clip {
+  width: 12px;
+  height: 8px;
+  background: linear-gradient(135deg, #e4e4e7, #71717a);
+  border-radius: 2px 2px 0 0;
+  margin-top: -2px;
+  z-index: 3;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+}
+
+.aperture-ring {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  margin-top: -2px;
+  transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  
+  /* Highly polished metallic silver */
+  background: conic-gradient(
+    from 45deg,
+    #a1a1aa 0%,
+    #f4f4f5 15%,
+    #71717a 30%,
+    #e4e4e7 45%,
+    #a1a1aa 60%,
+    #ffffff 75%,
+    #71717a 90%,
+    #a1a1aa 100%
+  );
+  
+  /* Punch out the center to make it a ring */
+  -webkit-mask-image: radial-gradient(circle at center, transparent 12px, black 13px);
+  mask-image: radial-gradient(circle at center, transparent 12px, black 13px);
+  
+  /* Drop shadow that follows the masked ring shape */
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.8));
+  
+  z-index: 2;
+  position: relative;
+}
+
+.aperture-ring::before {
+  display: none;
+}
+
+.nav-pull-string:hover .aperture-ring {
+  background: conic-gradient(
+    from 45deg,
+    #b45309 0%,
+    #fde68a 15%,
+    #d97706 30%,
+    #fef3c7 45%,
+    #b45309 60%,
+    #ffffff 75%,
+    #d97706 90%,
+    #b45309 100%
+  );
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 15px rgba(245, 158, 11, 0.6));
 }

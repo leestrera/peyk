@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, Alex_Brush, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
+import { Space_Grotesk, Plus_Jakarta_Sans, JetBrains_Mono, Playfair_Display, Alex_Brush } from "next/font/google";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -8,10 +8,11 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 const alexBrush = Alex_Brush({
-  variable: "--font-alex",
   weight: "400",
+  variable: "--font-alex",
   subsets: ["latin"],
 });
+
 
 const plusJakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
@@ -20,6 +21,11 @@ const plusJakarta = Plus_Jakarta_Sans({
 
 const jetbrains = JetBrains_Mono({
   variable: "--font-jetbrains",
+  subsets: ["latin"],
+});
+
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
   subsets: ["latin"],
 });
 
@@ -34,7 +40,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${spaceGrotesk.variable} ${alexBrush.variable} ${plusJakarta.variable} ${jetbrains.variable}`}>
+    <html lang="en" className={`${spaceGrotesk.variable} ${plusJakarta.variable} ${jetbrains.variable} ${playfair.variable} ${alexBrush.variable}`}>
       <body className="antialiased font-sans bg-background text-foreground min-h-screen">
         {children}
       </body>
