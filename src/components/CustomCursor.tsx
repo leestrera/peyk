@@ -19,15 +19,18 @@ export default function CustomCursor() {
     const setOuterX = gsap.quickSetter(outer, "x", "px");
     const setOuterY = gsap.quickSetter(outer, "y", "px");
 
+    // Bulletproof centering
+    gsap.set([inner, outer], { xPercent: -50, yPercent: -50 });
+
     const handleMouseMove = (e: MouseEvent) => {
       // Inner dot follows instantly
-      setInnerX(e.clientX - 13); // 26px / 2 = 13
-      setInnerY(e.clientY - 13);
+      setInnerX(e.clientX);
+      setInnerY(e.clientY);
 
       // Outer halo follows with a slight magnetic lag
       gsap.to(outer, {
-        x: e.clientX - 24, // 48px / 2 = 24
-        y: e.clientY - 24,
+        x: e.clientX,
+        y: e.clientY,
         duration: 0.15,
         ease: "power2.out",
         overwrite: "auto",
@@ -56,7 +59,7 @@ export default function CustomCursor() {
       <div
         ref={outerRef}
         className={`absolute top-0 left-0 rounded-full border border-peyk-glass transition-all will-change-transform
-          ${isHovering ? "h-[70px] w-[70px] -translate-x-[35px] -translate-y-[35px] bg-peyk-amber/10" : "h-[48px] w-[48px] -translate-x-[24px] -translate-y-[24px]"}
+          ${isHovering ? "h-[70px] w-[70px] bg-peyk-silver/10" : "h-[48px] w-[48px]"}
         `}
         style={{
           transitionDuration: "400ms",
@@ -66,8 +69,8 @@ export default function CustomCursor() {
       {/* Inner Dot */}
       <div
         ref={innerRef}
-        className={`absolute top-0 left-0 h-[26px] w-[26px] -translate-x-[13px] -translate-y-[13px] rounded-full transition-colors will-change-transform
-          ${isHovering ? "bg-peyk-amber shadow-[0_0_20px_rgba(245,158,11,0.6)]" : "bg-white"}
+        className={`absolute top-0 left-0 h-[26px] w-[26px] rounded-full transition-colors will-change-transform
+          ${isHovering ? "bg-peyk-silver shadow-[0_0_20px_rgba(245,158,11,0.6)]" : "bg-white"}
         `}
       />
     </div>
