@@ -58,7 +58,7 @@ export default function ServicesRealm() {
         <h3 className="services-title font-heading text-5xl font-black uppercase tracking-normal text-white transition-all md:text-6xl">
           Automations
         </h3>
-        <p className="mt-4 font-mono text-sm tracking-widest text-peyk-amber/80">
+        <p className="mt-4 font-mono text-sm tracking-widest text-peyk-silver/80">
           ENGINEERED SOLUTIONS
         </p>
       </div>
