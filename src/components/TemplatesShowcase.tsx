@@ -42,7 +42,7 @@ const TEMPLATES = [
     desktopImage: "/assets/images/your_vet_clinic/your_vet_clinic_desktop.png",
     mobileImage: "/assets/images/your_vet_clinic/your_vet_clinic_mobile.png",
     features: ["Patient Portal", "Scheduling System", "UI/UX Design", "Secure Database", "Deployment", "Compliance"],
-    url: "https://yourvet.vercel.app/"
+    url: "https://yourvet-peyk.vercel.app/"
   },
 ];
 
