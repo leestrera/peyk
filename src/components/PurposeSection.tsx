@@ -60,7 +60,7 @@ export default function PurposeSection() {
   return (
     <section 
       ref={containerRef}
-      className="relative flex min-h-[80vh] w-full flex-col items-center justify-center bg-[#fbfbfb] px-6 pt-64 pb-96 text-center z-10 overflow-hidden"
+      className="relative flex min-h-[80vh] w-full flex-col items-center justify-center bg-[#fbfbfb] px-6 pt-32 pb-48 md:pt-64 md:pb-96 text-center z-10 overflow-hidden"
     >
       {/* Seamless Transition from TemplatesShowcase */}
       <div className="absolute top-0 left-0 w-full h-48 bg-gradient-to-b from-[#f4f4f5] to-transparent z-20 pointer-events-none" />
@@ -84,7 +84,7 @@ export default function PurposeSection() {
           />
         </div>
         
-        <p ref={quoteRef} className="font-cursive text-5xl text-zinc-900 md:text-6xl lg:text-[5rem] leading-[1.2] flex flex-wrap justify-center gap-x-[1.2rem] gap-y-4">
+        <p ref={quoteRef} className="font-cursive text-3xl sm:text-5xl text-zinc-900 md:text-6xl lg:text-[5rem] leading-[1.2] flex flex-wrap justify-center gap-x-[1.2rem] gap-y-4">
           {words.map((word, i) => (
             <span key={i} className="quote-word will-change-[opacity,text-shadow]">
               {word}

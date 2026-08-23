@@ -10,8 +10,9 @@ export const FREEZE_COMPARISON_MODE = false;
 
 const PRELOADER_SCALE_X = 1.000;
 const PRELOADER_SCALE_Y = 0.995;
-const PRELOADER_NUDGE_X_PX = -7;
-const PRELOADER_NUDGE_Y_PX = 2;
+// Proportional scaling: We use percentages of the container's own width/height so it scales perfectly on mobile
+const PRELOADER_NUDGE_X_PERCENT = -0.72; // previously -7px
+const PRELOADER_NUDGE_Y_PERCENT = 0.20;  // previously 2px
 const PRELOADER_CONTAINER_MAX_WIDTH = "1147px";
 const PRELOADER_PLAYBACK_SPEED = 1.0;
 // =========================================================================
@@ -28,8 +29,8 @@ export default function Preloader({ onComplete }: PreloaderProps) {
   // Live adjustment state (active in Freeze Mode)
   const [scaleX, setScaleX] = useState(PRELOADER_SCALE_X);
   const [scaleY, setScaleY] = useState(PRELOADER_SCALE_Y);
-  const [nudgeX, setNudgeX] = useState(PRELOADER_NUDGE_X_PX);
-  const [nudgeY, setNudgeY] = useState(PRELOADER_NUDGE_Y_PX);
+  const [nudgeX, setNudgeX] = useState(PRELOADER_NUDGE_X_PERCENT);
+  const [nudgeY, setNudgeY] = useState(PRELOADER_NUDGE_Y_PERCENT);
   const [blendMode, setBlendMode] = useState<any>("multiply");
   const [overlayOpacity, setOverlayOpacity] = useState(100);
 
@@ -193,7 +194,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
         className="relative flex items-center justify-center transition-transform duration-75 w-[86.05vw] md:w-[66.93vw]"
         style={{
           maxWidth: PRELOADER_CONTAINER_MAX_WIDTH,
-          transform: `translate(${nudgeX}px, ${nudgeY}px) scale(${scaleX}, ${scaleY})`,
+          transform: `translate(${nudgeX}%, ${nudgeY}%) scale(${scaleX}, ${scaleY})`,
           mixBlendMode: FREEZE_COMPARISON_MODE ? blendMode : "normal",
           opacity: FREEZE_COMPARISON_MODE ? overlayOpacity / 100 : 1,
         }}
@@ -237,16 +238,16 @@ export default function Preloader({ onComplete }: PreloaderProps) {
           <div className="mb-3">
             <div className="flex justify-between mb-1">
               <span className="text-neutral-300">Nudge X:</span>
-              <span className="text-amber-300 font-bold">{nudgeX}px</span>
+              <span className="text-amber-300 font-bold">{nudgeX.toFixed(2)}%</span>
             </div>
-            <input type="range" min="-150" max="150" step="1" value={nudgeX} onChange={(e) => setNudgeX(parseInt(e.target.value))} className="w-full" />
+            <input type="range" min="-10" max="10" step="0.01" value={nudgeX} onChange={(e) => setNudgeX(parseFloat(e.target.value))} className="w-full" />
           </div>
           <div className="mb-3">
             <div className="flex justify-between mb-1">
               <span className="text-neutral-300">Nudge Y:</span>
-              <span className="text-amber-300 font-bold">{nudgeY}px</span>
+              <span className="text-amber-300 font-bold">{nudgeY.toFixed(2)}%</span>
             </div>
-            <input type="range" min="-150" max="150" step="1" value={nudgeY} onChange={(e) => setNudgeY(parseInt(e.target.value))} className="w-full" />
+            <input type="range" min="-10" max="10" step="0.01" value={nudgeY} onChange={(e) => setNudgeY(parseFloat(e.target.value))} className="w-full" />
           </div>
           <div className="mb-3">
             <div className="flex justify-between mb-1">
@@ -269,8 +270,8 @@ export default function Preloader({ onComplete }: PreloaderProps) {
           <div className="bg-black/60 p-2.5 rounded font-mono text-[10px] text-neutral-300 border border-white/10 select-all">
             const PRELOADER_SCALE_X = {scaleX.toFixed(3)};<br/>
             const PRELOADER_SCALE_Y = {scaleY.toFixed(3)};<br/>
-            const PRELOADER_NUDGE_X_PX = {nudgeX};<br/>
-            const PRELOADER_NUDGE_Y_PX = {nudgeY};
+            const PRELOADER_NUDGE_X_PERCENT = {nudgeX.toFixed(2)};<br/>
+            const PRELOADER_NUDGE_Y_PERCENT = {nudgeY.toFixed(2)};
           </div>
         </div>
       )}

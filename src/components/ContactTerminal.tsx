@@ -22,81 +22,139 @@ export default function ContactTerminal() {
     const container = containerRef.current;
     if (!container) return;
 
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: container,
-        start: "top top",
-        end: "+=1000",
-        scrub: 1,
-        pin: true,
-        anticipatePin: 1,
-        onUpdate: (self) => {
-          if (self.progress >= 0.99) {
-            setIsPatrolling(true);
-          } else {
-            setIsPatrolling(false);
+    let mm = gsap.matchMedia();
+
+    mm.add({
+      isDesktop: "(min-width: 1024px)",
+      isMobile: "(max-width: 1023px)"
+    }, (context) => {
+      let { isDesktop } = context.conditions as any;
+
+      if (!isDesktop) {
+        // MOBILE: Pin for intro sequence, then unpin and scroll naturally
+        
+        const mobileTl = gsap.timeline({
+          scrollTrigger: {
+            trigger: container,
+            start: "top top", // Trigger right at the top to match the black transition
+            end: "+=1000",    // Pin duration
+            scrub: 1,
+            pin: true,        // Pin it so the intro stays on screen
+            anticipatePin: 1,
+            onUpdate: (self) => {
+              if (self.progress >= 0.99) setIsPatrolling(true);
+              else setIsPatrolling(false);
+            },
           }
-        },
-        invalidateOnRefresh: true,
+        });
+
+        mobileTl
+          // 1. Void Text fades in and out
+          .to(".void-word-1", { opacity: 1, y: 0, duration: 0.15 }, 0)
+          .to(".void-word-2", { opacity: 1, y: 0, duration: 0.15 }, 0.15)
+          .to(".void-word-3", { opacity: 1, y: 0, duration: 0.15 }, 0.3)
+          .to(".dark-void-text", { opacity: 0, duration: 0.2 }, 0.6)
+          
+          // 2. Spider iris reveal & Black overlay fade out
+          .fromTo(".contact-black-overlay", 
+            { opacity: 1 },
+            { opacity: 0, duration: 0.3, ease: "power2.inOut" }, 
+            0.7
+          )
+          .fromTo(bugRef.current,
+            { scale: 400 },
+            { scale: 1, duration: 0.3, ease: "power2.inOut", force3D: false },
+            0.7
+          )
+          
+          // 3. Form and title fade in together
+          .to(".contact-reveal", {
+            opacity: 1,
+            y: 0,
+            duration: 0.3,
+            stagger: 0.05,
+            ease: "power2.out"
+          }, 0.7);
+        
+        return;
       }
+
+      // DESKTOP: Full cinematic pinned sequence
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: container,
+          start: "top top",
+          end: "+=1000",
+          scrub: 1,
+          pin: true,
+          anticipatePin: 1,
+          onUpdate: (self) => {
+            if (self.progress >= 0.99) {
+              setIsPatrolling(true);
+            } else {
+              setIsPatrolling(false);
+            }
+          },
+          invalidateOnRefresh: true,
+        }
+      });
+
+      // 1. Dark Void Typography Sequence
+      tl.to(".void-word-1", { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 0)
+        .to(".void-word-2", { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 0.2)
+        .to(".void-word-3", { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 0.4)
+        
+        // Fade void text out
+        .to(".dark-void-text", { opacity: 0, duration: 0.5, ease: "power2.inOut" }, 1.2)
+
+        // 2. Spider iris reveal
+        .fromTo(".contact-black-overlay", 
+          { opacity: 1 },
+          { opacity: 0, duration: 0.8, ease: "power2.inOut" }, 
+          1.7
+        )
+        .fromTo(bugRef.current,
+          { scale: 400 },
+          { scale: 1, duration: 0.8, ease: "power2.inOut", force3D: false },
+          1.7
+        )
+        
+        // 3. Reveal contact content
+        .to(".contact-reveal", {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: "power2.out"
+        }, 1.7);
     });
-
-    // 1. Dark Void Typography Sequence (faster)
-    tl.to(".void-word-1", { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 0)
-      .to(".void-word-2", { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 0.2)
-      .to(".void-word-3", { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 0.4)
-      
-      // Fade void text out (faster)
-      .to(".dark-void-text", { opacity: 0, duration: 0.5, ease: "power2.inOut" }, 1.2)
-
-      // 2. The spider scales from exactly where it is (no snapping), just like ApertureHero
-      // The black overlay acts as the perfect corner-filler crossfade (same as glow-overlay in Hero)
-      .fromTo(".contact-black-overlay", 
-        { opacity: 1 },
-        { opacity: 0, duration: 0.8, ease: "power2.inOut" }, 
-        1.7
-      )
-      .fromTo(bugRef.current,
-        { scale: 400 },
-        { scale: 1, duration: 0.8, ease: "power2.inOut", force3D: false },
-        1.7
-      )
-      
-      // 3. All contact content appears concurrently with the iris reveal
-      .to(".contact-reveal", {
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-        ease: "power2.out"
-      }, 1.7);
 
   }, { scope: containerRef });
 
   return (
     <section id="contact" className="relative w-full bg-[#fbfbfb] z-20">
       
-      {/* The Cinematic Terminal Sequence (Pinned) */}
-      <div ref={containerRef} className="relative w-full h-screen px-6 flex flex-col justify-center overflow-hidden">
+      {/* The Cinematic Terminal Sequence */}
+      <div ref={containerRef} className="relative w-full min-h-screen lg:h-[100vh] px-4 md:px-6 flex flex-col pt-24 pb-12 lg:py-0 lg:justify-center overflow-x-hidden lg:overflow-hidden">
         
         {/* Full screen overlay to cover extreme corners during the scale reveal */}
-        <div className="contact-black-overlay absolute inset-0 z-[40] bg-[#09090b] pointer-events-none" />
+        <div className="contact-black-overlay absolute top-0 left-0 w-full h-[100vh] lg:h-full lg:inset-0 z-[40] bg-[#09090b] pointer-events-none" />
 
         {/* The Dark Void Typography Sequence */}
-        <div className="dark-void-text absolute inset-0 z-[60] flex flex-col items-center justify-center pointer-events-none px-6">
+        <div className="dark-void-text absolute top-0 left-0 w-full h-[100vh] lg:h-full lg:inset-0 z-[60] flex flex-col items-center justify-center pointer-events-none px-6">
           <div className="flex flex-col items-start gap-8 md:gap-12 w-full max-w-5xl">
             <div className="void-word void-word-1 flex flex-col opacity-0 translate-y-[50px]">
-              <span className="font-cursive text-4xl md:text-6xl text-white -mb-4 md:-mb-6 ml-2 md:ml-4 drop-shadow-md">from</span>
-              <span className="font-heading text-5xl md:text-[6rem] lg:text-[8rem] font-black uppercase tracking-tighter text-white leading-none drop-shadow-xl">Concept</span>
+              <span className="font-cursive text-2xl sm:text-4xl md:text-6xl text-white -mb-4 md:-mb-6 ml-2 md:ml-4 drop-shadow-md">from</span>
+              <span className="font-heading text-3xl sm:text-5xl md:text-[6rem] lg:text-[8rem] font-black uppercase tracking-tighter text-white leading-none drop-shadow-xl">Concept</span>
             </div>
             
             <div className="void-word void-word-2 flex flex-col ml-8 md:ml-24 opacity-0 translate-y-[50px]">
-              <span className="font-cursive text-4xl md:text-6xl text-white -mb-4 md:-mb-6 ml-2 md:ml-4 drop-shadow-md">through</span>
-              <span className="font-heading text-5xl md:text-[6rem] lg:text-[8rem] font-black uppercase tracking-tighter text-white leading-none drop-shadow-xl">Architecture</span>
+              <span className="font-cursive text-2xl sm:text-4xl md:text-6xl text-white -mb-4 md:-mb-6 ml-2 md:ml-4 drop-shadow-md">through</span>
+              <span className="font-heading text-3xl sm:text-5xl md:text-[6rem] lg:text-[8rem] font-black uppercase tracking-tighter text-white leading-none drop-shadow-xl">Architecture</span>
             </div>
             
             <div className="void-word void-word-3 flex flex-col ml-16 md:ml-48 opacity-0 translate-y-[50px]">
-              <span className="font-cursive text-4xl md:text-6xl text-white -mb-4 md:-mb-6 ml-2 md:ml-4 drop-shadow-md">into</span>
-              <span className="font-heading text-5xl md:text-[6rem] lg:text-[8rem] font-black uppercase tracking-tighter text-white leading-none drop-shadow-xl">Legacy</span>
+              <span className="font-cursive text-2xl sm:text-4xl md:text-6xl text-white -mb-4 md:-mb-6 ml-2 md:ml-4 drop-shadow-md">into</span>
+              <span className="font-heading text-3xl sm:text-5xl md:text-[6rem] lg:text-[8rem] font-black uppercase tracking-tighter text-white leading-none drop-shadow-xl">Legacy</span>
             </div>
           </div>
         </div>
@@ -104,17 +162,17 @@ export default function ContactTerminal() {
         {/* Subtle Background Elements */}
         <div className="contact-reveal absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-zinc-100 to-transparent opacity-0 pointer-events-none z-10" />
 
-        <div className="mx-auto max-w-7xl relative z-20 w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+        <div className="mx-auto max-w-7xl relative z-20 w-full flex-1 flex flex-col lg:min-h-0 lg:justify-center">
+          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 lg:gap-24 h-full lg:h-auto lg:items-center">
             
             {/* Left Side: Architectural Typography */}
-            <div ref={textAvoidRef} className="relative flex flex-col justify-center">
+            <div ref={textAvoidRef} className="relative flex flex-col justify-center shrink-0">
               <div className="contact-reveal absolute -left-6 md:-left-12 top-0 h-full w-[1px] bg-zinc-200 hidden md:block opacity-0" />
               
               <p className="contact-reveal font-mono text-xs tracking-[0.4em] text-zinc-400 mb-8 uppercase opacity-0 translate-y-[20px]">
                 Secure Communication Channel
               </p>
-              <h3 className="font-heading text-6xl md:text-8xl font-black uppercase tracking-tighter text-zinc-900 leading-[0.85] flex flex-wrap items-end relative z-30">
+              <h3 className="font-heading text-4xl sm:text-6xl md:text-8xl font-black uppercase tracking-tighter text-zinc-900 leading-[0.85] flex flex-wrap items-end relative z-30">
                 {/* The heading text is hidden, but NOT the spider's dot container */}
                 <span className="contact-reveal opacity-0 translate-y-[20px]">Bring us<br />a problem</span>
                 <span 
@@ -141,11 +199,11 @@ export default function ContactTerminal() {
           </div>
 
             {/* Right Side: The Terminal */}
-            <div ref={avoidRef} className="contact-reveal relative z-20 opacity-0 translate-y-[20px]">
+            <div ref={avoidRef} className="contact-reveal relative z-20 opacity-0 translate-y-[20px] flex-1 h-auto mt-12 lg:mt-0">
               {/* Ambient Glow */}
-              <div className="absolute -inset-10 bg-zinc-200/50 rounded-[3rem] blur-3xl -z-10" />
+              <div className="absolute -inset-10 bg-zinc-200/50 rounded-[3rem] blur-3xl -z-10 hidden lg:block" />
               
-              <div className="group relative overflow-y-auto no-scrollbar max-h-[85vh] overflow-x-hidden bg-[#09090b] p-8 md:p-12 shadow-[0_40px_100px_rgba(0,0,0,0.15)] transition-all duration-500 rounded-3xl border border-white/5">
+              <div className="group relative h-auto overflow-hidden lg:overflow-y-auto no-scrollbar lg:max-h-[85vh] bg-[#09090b] p-5 sm:p-8 md:p-12 shadow-[0_40px_100px_rgba(0,0,0,0.15)] transition-all duration-500 rounded-3xl border border-white/5">
                 <div className="mb-8 mt-2">
                   <h4 className="font-heading text-2xl md:text-3xl font-bold text-white uppercase tracking-tighter">Initialize Project</h4>
                   <p className="font-mono text-[9px] text-zinc-500 tracking-[0.2em] mt-1.5 uppercase">Secure intake protocol</p>
@@ -257,26 +315,32 @@ export default function ContactTerminal() {
               </span>
               <ul className="space-y-4 font-mono text-[11px] text-zinc-500 uppercase tracking-wider">
                 <li>
-                  <a href="#hero" className="hover:text-zinc-900 transition-colors duration-200 flex items-center gap-4 group">
-                    <span>Top</span>
+                  <a 
+                    href="#hero" 
+                    onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                    className="hover:text-zinc-900 transition-colors duration-200 flex items-center gap-4 group"
+                  >
+                    <span>Home</span>
                     <span className="opacity-0 group-hover:opacity-100 transition-opacity transform -translate-x-2 group-hover:translate-x-0 duration-300">↑</span>
                   </a>
                 </li>
                 <li>
-                  <a href="#agency" className="hover:text-zinc-900 transition-colors duration-200 flex items-center gap-4 group">
-                    <span>Agency</span>
+                  <a 
+                    href="#" 
+                    onClick={(e) => e.preventDefault()}
+                    className="hover:text-zinc-900 transition-colors duration-200 flex items-center gap-4 group cursor-not-allowed"
+                  >
+                    <span>About Us</span>
                     <span className="opacity-0 group-hover:opacity-100 transition-opacity transform -translate-x-2 group-hover:translate-x-0 duration-300">→</span>
                   </a>
                 </li>
                 <li>
-                  <a href="#services" className="hover:text-zinc-900 transition-colors duration-200 flex items-center gap-4 group">
-                    <span>Capabilities</span>
-                    <span className="opacity-0 group-hover:opacity-100 transition-opacity transform -translate-x-2 group-hover:translate-x-0 duration-300">→</span>
-                  </a>
-                </li>
-                <li>
-                  <a href="#work" className="hover:text-zinc-900 transition-colors duration-200 flex items-center gap-4 group">
-                    <span>Templates</span>
+                  <a 
+                    href="#" 
+                    onClick={(e) => e.preventDefault()}
+                    className="hover:text-zinc-900 transition-colors duration-200 flex items-center gap-4 group cursor-not-allowed"
+                  >
+                    <span>Contact Us</span>
                     <span className="opacity-0 group-hover:opacity-100 transition-opacity transform -translate-x-2 group-hover:translate-x-0 duration-300">→</span>
                   </a>
                 </li>
@@ -293,15 +357,6 @@ export default function ContactTerminal() {
                 <a href="#" className="hover:text-zinc-900 transition-colors duration-200">Twitter / X</a>
                 <a href="#" className="hover:text-zinc-900 transition-colors duration-200">LinkedIn</a>
                 <a href="#" className="hover:text-zinc-900 transition-colors duration-200">GitHub</a>
-              </div>
-
-              <div className="mt-10">
-                <span className="font-mono text-[10px] text-zinc-400 uppercase tracking-widest mb-4 block font-semibold">
-                  Direct Line
-                </span>
-                <a href="mailto:hello@peyk.app" className="font-mono text-xs text-zinc-900 hover:text-amber-500 transition-colors duration-200 tracking-wider">
-                  HELLO@PEYK.APP
-                </a>
               </div>
             </div>
 

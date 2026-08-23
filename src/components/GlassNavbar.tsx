@@ -133,7 +133,7 @@ export default function GlassNavbar() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
       <nav
-        className={`pointer-events-auto relative flex items-center justify-between rounded-full px-6 py-3 transition-all duration-700 ease-out will-change-transform 
+        className={`pointer-events-auto relative flex flex-col md:flex-row items-center justify-between rounded-3xl md:rounded-full px-6 py-4 md:py-3 gap-4 md:gap-0 transition-all duration-700 ease-out will-change-transform 
           ${!isScrolled 
             ? "-translate-y-[150%] opacity-0" 
             : isMenuOpen 
@@ -145,7 +145,7 @@ export default function GlassNavbar() {
         
         {/* === THE ROPE (Hangs off the bottom of the navbar) === */}
         <div 
-          className={`absolute top-[100%] right-12 transition-opacity duration-500 ease-in-out ${isScrolled ? "opacity-100" : "opacity-0"}`}
+          className={`absolute top-[100%] right-6 md:right-12 transition-opacity duration-500 ease-in-out ${isScrolled ? "opacity-100" : "opacity-0"}`}
         >
           <div ref={pullStringRef} className="nav-pull-string" onClick={handleRopeClick}>
             <div ref={threadRef} className="lanyard-thread"></div>
@@ -154,7 +154,7 @@ export default function GlassNavbar() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex w-full md:w-auto items-center justify-center md:justify-start gap-3">
           <Image
             src="/assets/logos/text_logo.png"
             alt="Peyk Logo"
@@ -165,45 +165,44 @@ export default function GlassNavbar() {
           />
         </div>
 
-        <ul className="ml-10 hidden items-center gap-2 md:flex p-1 rounded-full bg-white/5 border border-white/5">
+        <ul className="md:ml-10 flex flex-col md:flex-row items-center gap-2 p-2 md:p-1 w-full md:w-auto rounded-2xl md:rounded-full bg-white/5 border border-white/5">
           <li>
             <a
-              href="#purpose"
-              className={`block px-4 py-1.5 font-sans text-sm font-medium transition-all duration-300 rounded-full ${
-                activeSection === "purpose" ? "bg-white/15 text-white shadow-sm" : "text-white/60 hover:text-white hover:bg-white/10"
+              href="#hero"
+              onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+              className={`block w-full text-center px-6 md:px-4 py-2 md:py-1.5 font-sans text-sm font-medium transition-all duration-300 rounded-xl md:rounded-full ${
+                activeSection === "hero" ? "bg-white/15 text-white shadow-sm" : "text-white/60 hover:text-white hover:bg-white/10"
               }`}
               data-magnetic
             >
-              Purpose
+              Home
             </a>
           </li>
           <li>
             <a
-              href="#showcase"
-              className={`block px-4 py-1.5 font-sans text-sm font-medium transition-all duration-300 rounded-full ${
-                activeSection === "showcase" ? "bg-white/15 text-white shadow-sm" : "text-white/60 hover:text-white hover:bg-white/10"
-              }`}
+              href="#"
+              onClick={(e) => e.preventDefault()}
+              className={`block w-full text-center px-6 md:px-4 py-2 md:py-1.5 font-sans text-sm font-medium transition-all duration-300 rounded-xl md:rounded-full text-white/60 hover:text-white hover:bg-white/10 cursor-not-allowed`}
               data-magnetic
             >
-              Showcase
+              About Us
             </a>
           </li>
           <li>
             <a
-              href="#contact"
-              className={`block px-4 py-1.5 font-sans text-sm font-medium transition-all duration-300 rounded-full ${
-                activeSection === "contact" ? "bg-white/15 text-white shadow-sm" : "text-white/60 hover:text-white hover:bg-white/10"
-              }`}
+              href="#"
+              onClick={(e) => e.preventDefault()}
+              className={`block w-full text-center px-6 md:px-4 py-2 md:py-1.5 font-sans text-sm font-medium transition-all duration-300 rounded-xl md:rounded-full text-white/60 hover:text-white hover:bg-white/10 cursor-not-allowed`}
               data-magnetic
             >
-              Terminal
+              Contact Us
             </a>
           </li>
         </ul>
 
-        <div className="ml-10 hidden md:block">
+        <div className="md:ml-10 w-full md:w-auto block">
           <button
-            className="rounded-full px-5 py-2 font-sans text-sm font-semibold transition-all hover:scale-105 hover:bg-peyk-silver bg-white text-background"
+            className="w-full md:w-auto rounded-full px-5 py-3 md:py-2 font-sans text-sm font-semibold transition-all hover:scale-105 hover:bg-peyk-silver bg-white text-background"
             data-magnetic
           >
             Connect

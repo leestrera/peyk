@@ -141,7 +141,7 @@ export default function ApertureHero() {
           </span>
           <div
             ref={dotRef}
-            className="relative inline-flex items-center justify-center h-[1.5vw] w-[1.5vw] mt-[3vw] -ml-[0.5vw] will-change-transform origin-center"
+            className="relative inline-flex items-center justify-center h-[1.5vw] w-[1.5vw] min-h-[6px] min-w-[6px] mt-[3vw] -ml-[0.5vw] will-change-transform origin-center"
           >
             {/* The roaming bug that becomes the aperture transition! */}
             <MechanicalSpider 

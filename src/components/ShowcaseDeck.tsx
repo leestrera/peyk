@@ -54,7 +54,7 @@ export default function ShowcaseDeck() {
   }, []);
 
   return (
-    <section ref={containerRef} className="relative w-full bg-transparent">
+    <section id="showcase" ref={containerRef} className="relative w-full bg-transparent">
       {PRODUCTS.map((product, index) => (
         <div
           key={product.id}

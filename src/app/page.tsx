@@ -10,12 +10,14 @@ import ContactTerminal from "@/components/ContactTerminal";
 import ScrollRestoration from "@/components/ScrollRestoration";
 import TemplatesShowcase from "@/components/TemplatesShowcase";
 import Preloader from "@/components/Preloader";
+import ScrollIndicator from "@/components/ScrollIndicator";
 
 export default function Home() {
   return (
     <main className="relative w-full bg-background overflow-clip">
       <ScrollRestoration />
       <Preloader />
+      <ScrollIndicator />
       <CustomCursor />
       <GlassNavbar />
       

@@ -132,12 +132,12 @@ export default function Manifesto() {
         </div>
 
         <div className="relative z-10 max-w-4xl space-y-8">
-          <h2 className="font-heading text-4xl font-bold uppercase tracking-widest text-white md:text-6xl">
+          <h2 className="font-heading text-3xl sm:text-4xl md:text-6xl font-bold uppercase tracking-widest text-white">
             The Messenger<span className="text-peyk-silver">.</span>
           </h2>
           
           <p 
-            className="font-cursive text-5xl text-white md:text-7xl leading-relaxed"
+            className="font-cursive text-3xl sm:text-5xl md:text-7xl text-white leading-relaxed"
             dangerouslySetInnerHTML={{ __html: displayText === targetText ? targetText : displayText }}
           />
         </div>
