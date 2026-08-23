@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, Plus_Jakarta_Sans, JetBrains_Mono, Playfair_Display, Alex_Brush } from "next/font/google";
 import "./globals.css";
+import SmoothScrolling from "@/components/SmoothScrolling";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space",
@@ -42,7 +43,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${spaceGrotesk.variable} ${plusJakarta.variable} ${jetbrains.variable} ${playfair.variable} ${alexBrush.variable}`}>
       <body className="antialiased font-sans bg-background text-foreground min-h-screen">
-        {children}
+        <SmoothScrolling>
+          {children}
+        </SmoothScrolling>
       </body>
     </html>
   );

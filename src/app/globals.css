@@ -33,6 +33,14 @@ body {
   }
 }
 
+/* Hide cursor entirely during preloader */
+body.is-preloading .custom-cursor {
+  display: none !important;
+}
+body.is-preloading {
+  cursor: none !important;
+}
+
 /* Hide scrollbar for elements with .no-scrollbar */
 .no-scrollbar::-webkit-scrollbar {
   display: none;

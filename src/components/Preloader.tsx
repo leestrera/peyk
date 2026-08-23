@@ -41,6 +41,8 @@ export default function Preloader({ onComplete }: PreloaderProps) {
     setIsExiting(true);
       setTimeout(() => {
         setIsDone(true);
+        document.body.classList.remove("is-preloading");
+        document.body.style.overflow = "";
         if (onComplete) onComplete();
         window.dispatchEvent(new CustomEvent("preloaderComplete"));
       }, 800); // Matches CSS transition duration
@@ -144,10 +146,20 @@ export default function Preloader({ onComplete }: PreloaderProps) {
   }, [isExiting]);
 
   useEffect(() => {
+    if (!FREEZE_COMPARISON_MODE) {
+      document.body.classList.add("is-preloading");
+      document.body.style.overflow = "hidden";
+    }
+    
     if (FREEZE_COMPARISON_MODE && videoRef.current) {
       videoRef.current.currentTime = 3.9;
       videoRef.current.pause();
     }
+
+    return () => {
+      document.body.classList.remove("is-preloading");
+      document.body.style.overflow = "";
+    };
   }, []);
 
   const handleTimeUpdate = () => {
@@ -156,6 +168,8 @@ export default function Preloader({ onComplete }: PreloaderProps) {
       setIsExiting(true);
       setTimeout(() => {
         setIsDone(true);
+        document.body.classList.remove("is-preloading");
+        document.body.style.overflow = "";
         if (onComplete) onComplete();
         window.dispatchEvent(new CustomEvent("preloaderComplete"));
       }, 800);
