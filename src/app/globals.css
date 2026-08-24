@@ -71,16 +71,14 @@ body.is-preloading {
   align-items: center;
   cursor: pointer;
   transform-origin: top center;
-  will-change: transform;
-}
+  }
 
 .lanyard-thread {
   width: 1px;
   height: 40px;
   background: rgba(255, 255, 255, 0.15);
   transform-origin: top;
-  will-change: height;
-}
+  }
 
 .lanyard-clip {
   width: 12px;

@@ -24,6 +24,8 @@ interface PreloaderProps {
 export default function Preloader({ onComplete }: PreloaderProps) {
   const [isExiting, setIsExiting] = useState(false);
   const [isDone, setIsDone] = useState(false);
+  const [canvasFailed, setCanvasFailed] = useState(false);
+  const [showFallbackButton, setShowFallbackButton] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // Live adjustment state (active in Freeze Mode)
@@ -40,6 +42,25 @@ export default function Preloader({ onComplete }: PreloaderProps) {
   const handleFinish = () => {
     if (FREEZE_COMPARISON_MODE || isExiting || isDone) return;
     setIsExiting(true);
+    setTimeout(() => {
+      setIsDone(true);
+      document.body.classList.remove("is-preloading");
+      document.body.style.overflow = "";
+      if (onComplete) onComplete();
+      window.dispatchEvent(new CustomEvent("preloaderComplete"));
+    }, 800);
+  };
+
+  const forceStart = () => {
+    if (videoRef.current) {
+      videoRef.current.play().catch(() => {});
+    }
+    handleFinish();
+  };
+
+  const __temp = () => {
+    if (FREEZE_COMPARISON_MODE || isExiting || isDone) return;
+    setIsExiting(true);
       setTimeout(() => {
         setIsDone(true);
         document.body.classList.remove("is-preloading");
@@ -51,6 +72,22 @@ export default function Preloader({ onComplete }: PreloaderProps) {
 
   // Real-time Video Background Removal (Chroma Key)
   useEffect(() => {
+    const checkAutoplay = setTimeout(() => {
+      if (videoRef.current && videoRef.current.currentTime === 0) {
+        setShowFallbackButton(true);
+      }
+    }, 800);
+    const fallbackComplete = setTimeout(() => {
+      if (!isExiting) handleFinish();
+    }, 6000);
+    return () => {
+      clearTimeout(checkAutoplay);
+      clearTimeout(fallbackComplete);
+    };
+  }, [isExiting]);
+
+  // Real-time Video Background Removal
+  useEffect(() => {
     let animationFrameId: number;
 
     const processFrame = () => {
@@ -60,15 +97,24 @@ export default function Preloader({ onComplete }: PreloaderProps) {
 
       const ctx = canvas.getContext("2d", { willReadFrequently: true });
       if (ctx && video.readyState >= 2 && video.videoWidth > 0) {
-        // Match canvas size to video size
-        if (canvas.width !== video.videoWidth) canvas.width = video.videoWidth;
-        if (canvas.height !== video.videoHeight) canvas.height = video.videoHeight;
-
-        // Draw the current video frame
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        // DOWNSCALE HACK: 50% resolution on mobile to save CPU on simulator/phones
+        const scale = window.innerWidth < 768 ? 0.5 : 1;
+        const targetWidth = Math.floor(video.videoWidth * scale);
+        const targetHeight = Math.floor(video.videoHeight * scale);
         
-        // Process pixels to remove background and make lines black
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        if (canvas.width !== targetWidth) canvas.width = targetWidth;
+        if (canvas.height !== targetHeight) canvas.height = targetHeight;
+
+        ctx.drawImage(video, 0, 0, targetWidth, targetHeight);
+        
+        let imageData;
+        try {
+          imageData = ctx.getImageData(0, 0, targetWidth, targetHeight);
+        } catch (e) {
+          // iOS Safari SecurityError (Canvas Tainted by HTTP local IP video)
+          setCanvasFailed(true);
+          return;
+        }
         const data = imageData.data;
         
         // 1. Calculate overall average brightness to determine if background is Black or White
@@ -181,7 +227,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
 
   return (
     <div
-      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center select-none will-change-transform bg-white ${
+      className={`fixed top-0 left-0 w-full h-screen z-[100] flex flex-col items-center justify-center select-none  bg-white ${
         FREEZE_COMPARISON_MODE
           ? "pointer-events-auto"
           : isExiting
@@ -200,21 +246,35 @@ export default function Preloader({ onComplete }: PreloaderProps) {
         }}
       >
         {/* Hidden source video */}
+        {/* Source video */}
         <video
           ref={videoRef}
           src="/assets/videos/Motion_graphics_text_animation_1080p_202608211315.mp4"
           muted
           playsInline
-          crossOrigin="anonymous"
           autoPlay={!FREEZE_COMPARISON_MODE}
           onTimeUpdate={handleTimeUpdate}
-          className="absolute opacity-0 w-px h-px pointer-events-none"
+          className={`w-full h-auto max-h-[75vh] object-contain block !p-0 !m-0 ${canvasFailed ? "opacity-100" : "absolute opacity-0 w-px h-px pointer-events-none"}`}
+          style={canvasFailed ? { filter: "invert(1)" } : {}}
         />
         {/* Transparent Canvas Renderer */}
-        <canvas 
-          ref={canvasRef} 
-          className="w-full h-auto max-h-[75vh] object-contain block !p-0 !m-0"
-        />
+        {!canvasFailed && (
+          <canvas 
+            ref={canvasRef} 
+            className="w-full h-auto max-h-[75vh] object-contain block !p-0 !m-0"
+          />
+        )}
+        
+        {/* iOS Safari Autoplay Fallback Button */}
+        {showFallbackButton && (
+          <button
+            onClick={forceStart}
+            className="absolute z-[200] px-8 py-4 bg-black text-white text-sm font-bold uppercase tracking-widest border border-white/20 hover:bg-white hover:text-black transition-colors shadow-[0_0_40px_rgba(255,255,255,0.2)]"
+            style={{ bottom: "15vh" }}
+          >
+            Enter Studio
+          </button>
+        )}
       </div>
 
       {/* Floating Tuning Dock */}

@@ -1,6 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 export default function ScrollRestoration() {
   useEffect(() => {
@@ -10,6 +16,32 @@ export default function ScrollRestoration() {
     }
     // Force scroll to top
     window.scrollTo(0, 0);
+
+    // FIX FOR NEXT.JS DYNAMIC IMPORTS:
+    // When dynamic components mount out-of-order, their ScrollTriggers are created out-of-order.
+    // If a lower component creates a trigger, and then a higher component mounts and adds pinning,
+    // the lower component's trigger will have incorrect start/end values.
+    // Sorting them before every refresh guarantees they are calculated top-to-bottom.
+    const sortTriggers = () => ScrollTrigger.sort();
+    ScrollTrigger.addEventListener("refreshInit", sortTriggers);
+
+    // FIX: Next.js dynamic components often change the body height silently after mount.
+    // We must use a ResizeObserver on the document body to force GSAP to recalculate 
+    // all trigger positions whenever the physical DOM height changes.
+    let refreshTimeout: NodeJS.Timeout;
+    const bodyObserver = new ResizeObserver(() => {
+      clearTimeout(refreshTimeout);
+      refreshTimeout = setTimeout(() => {
+        ScrollTrigger.refresh();
+      }, 100); // 100ms debounce
+    });
+    bodyObserver.observe(document.body);
+
+    return () => {
+      ScrollTrigger.removeEventListener("refreshInit", sortTriggers);
+      bodyObserver.disconnect();
+      clearTimeout(refreshTimeout);
+    };
   }, []);
 
   return null;

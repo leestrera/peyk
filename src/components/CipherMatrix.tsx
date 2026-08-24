@@ -40,7 +40,7 @@ export function CipherMatrix({ colorClass, keywords }: CipherMatrixProps) {
 
     let animationFrameId: number;
     let lastUpdate = 0;
-    
+
     // We only want a few keywords to be visible at any given time
     const activeKeywords: { row: number, col: number, text: string, timer: number }[] = [];
 
@@ -48,11 +48,11 @@ export function CipherMatrix({ colorClass, keywords }: CipherMatrixProps) {
       // Throttle updates to ~15fps for that "terminal" feel (60ms)
       if (timestamp - lastUpdate > 60) {
         lastUpdate = timestamp;
-        
+
         // Randomly mutate some characters in every row
         rowsRef.current.forEach((row, i) => {
           let text = row.innerText.split('');
-          
+
           // Mutate 3% of the string
           const mutations = Math.floor(colCount * 0.03);
           for (let m = 0; m < mutations; m++) {
@@ -70,7 +70,7 @@ export function CipherMatrix({ colorClass, keywords }: CipherMatrixProps) {
               }
             }
           }
-          
+
           row.innerText = text.join('');
         });
 
@@ -94,16 +94,37 @@ export function CipherMatrix({ colorClass, keywords }: CipherMatrixProps) {
       animationFrameId = requestAnimationFrame(updateMatrix);
     };
 
-    animationFrameId = requestAnimationFrame(updateMatrix);
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          if (!animationFrameId) {
+            lastUpdate = performance.now();
+            animationFrameId = requestAnimationFrame(updateMatrix);
+          }
+        } else {
+          if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = 0;
+          }
+        }
+      });
+    }, { rootMargin: "100px" });
 
-    return () => cancelAnimationFrame(animationFrameId);
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => {
+      observer.disconnect();
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    };
   }, [colorClass, keywords]);
 
   return (
     <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none z-[5]">
       {/* The Matrix Container */}
       <div ref={containerRef} className="absolute inset-0 flex flex-col items-center justify-center w-full h-full" />
-      
+
       {/* Foreground Vignette to soften the edges without maskImage lag */}
       <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_200px_rgba(9,9,11,1)]" />
     </div>

@@ -33,8 +33,6 @@ function Airplane3D({ isForward }: { isForward: boolean }) {
     // Apply the Obsidian Luxury material to all meshes in the downloaded model
     scene.traverse((child) => {
       if (child instanceof THREE.Mesh) {
-        child.castShadow = true;
-        child.receiveShadow = true;
         child.material = new THREE.MeshStandardMaterial({
           color: "#09090b",
           roughness: 0.15,
@@ -87,9 +85,23 @@ export default function CloudTransition() {
   const textCoverRef = useRef<HTMLDivElement>(null);
   const planeRef = useRef<HTMLDivElement>(null);
   const planeIconRef = useRef<HTMLDivElement>(null);
+  const canvasWrapperRef = useRef<HTMLDivElement>(null);
 
   const [isForward, setIsForward] = useState(true);
   const isForwardRef = useRef(true);
+  const [canvasVisible, setCanvasVisible] = useState(false);
+
+  // Pause the Three.js render loop when the canvas is off-screen
+  useEffect(() => {
+    const el = canvasWrapperRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setCanvasVisible(entry.isIntersecting),
+      { rootMargin: '200px' } // Start rendering slightly before it enters view
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (!spacerRef.current || !wrapperRef.current || !textCoverRef.current || !planeRef.current || !planeIconRef.current) return;
@@ -129,7 +141,7 @@ export default function CloudTransition() {
     // Using .set instead of overlapping .fromTo prevents GSAP scrub lockups!
     gsap.set(wrapperRef.current, { x: "120vw" });
     gsap.set(planeRef.current, { opacity: 0, left: "0%" });
-    gsap.set(textCoverRef.current, { width: "calc(100% + 15vw)" });
+    gsap.set(textCoverRef.current, { width: "calc(100% + 15vw)", xPercent: 0 });
 
     // ---------------------------------------------------------
     // PHASE 1: CLOUD SWEEPS IN (Time 0 to 3)
@@ -148,6 +160,7 @@ export default function CloudTransition() {
     // Phase 2: Skywriting (Text reveal locked to scroll)
     tl.add("skywriting", 3.5);
     tl.to(planeRef.current, { left: "100%", ease: "none", duration: 3 }, "skywriting");
+    // Restored width animation for the soft mask wipe, lag is prevented by will-change-transform
     tl.to(textCoverRef.current, { width: "15vw", ease: "none", duration: 3 }, "skywriting");
 
     // Plane accelerates slightly off the text and fades out (time 6.5 to 7)
@@ -162,10 +175,6 @@ export default function CloudTransition() {
 
     // Hide completely after sweep off to prevent any edge bleeding or white box artifacts
     tl.set(wrapperRef.current, { autoAlpha: 0 }, 10);
-
-    return () => {
-      ScrollTrigger.getAll().forEach((t) => t.kill());
-    };
   }, []);
 
   return (
@@ -181,19 +190,17 @@ export default function CloudTransition() {
       {/* The Wrapper containing both the fog and the crisp overlay */}
       <div 
         ref={wrapperRef}
-        className="fixed -top-[25vh] h-[150vh] pointer-events-none z-[100] flex items-center justify-center"
+        className="fixed -top-[25vh] h-[150vh] pointer-events-none z-[100] flex items-center justify-center will-change-transform"
         style={{
           width: "300vw",
-          willChange: "transform"
+          
         }}
       >
-        {/* The Solid Fog Background (Blurred) */}
-        <div className="absolute inset-0 w-full h-full" style={{ filter: "blur(100px)" }}>
-          <div 
-            className="w-full h-full bg-white" 
-            style={{ clipPath: "polygon(0% 0%, 100% 0%, 97% 50%, 100% 100%, 0% 100%, 3% 50%)" }}
-          />
-        </div>
+        {/* The Solid Fog Background (High-performance gradient instead of GPU-crashing blur filter) */}
+        <div 
+          className="absolute inset-0 w-full h-full" 
+          style={{ background: "linear-gradient(to right, transparent 0%, white 15%, white 85%, transparent 100%)" }} 
+        />
 
         {/* The Content Overlay (Crisp, unblurred) */}
         <div className="relative z-10 flex items-center">
@@ -210,7 +217,7 @@ export default function CloudTransition() {
             {/* The Text Cover (Solid White Box that shrinks to reveal, softened by a mask trail) */}
             <div 
               ref={textCoverRef}
-              className="absolute top-0 right-0 h-full bg-white z-10"
+              className="absolute top-0 right-0 h-full bg-white z-10 will-change-transform"
               style={{ 
                 width: "calc(100% + 15vw)",
                 WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 15vw)",
@@ -224,20 +231,25 @@ export default function CloudTransition() {
               className="absolute top-1/2 -translate-y-1/2 left-0 z-20"
             >
               {/* This inner div flips the plane horizontally based on scroll direction */}
-              <div ref={planeIconRef} className="w-[15vw] h-[15vw]">
-                <Canvas camera={{ position: [0, 5, 0], fov: 40 }} gl={{ alpha: true }}>
+              <div ref={(node) => { planeIconRef.current = node; canvasWrapperRef.current = node; }} className="w-[15vw] h-[15vw] relative">
+                <Canvas
+                  camera={{ position: [0, 5, 0], fov: 40 }}
+                  gl={{ alpha: true }}
+                  frameloop={canvasVisible ? 'always' : 'never'}
+                  dpr={Math.min(typeof window !== 'undefined' ? window.devicePixelRatio : 1, 1.5)}
+                >
                   <ambientLight intensity={1.5} />
                   <directionalLight position={[5, 10, 5]} intensity={3} />
                   <directionalLight position={[-5, 5, -5]} intensity={2} />
                   <pointLight position={[0, 10, 0]} intensity={2} />
-                  
-                  {/* Flawless shadow dropped exactly onto the HTML text! */}
-                  <ContactShadows position={[0, -0.5, 0]} opacity={0.4} scale={5} blur={1.5} far={4} color="#000000" />
-                  
+                  {/* Removed expensive WebGL ContactShadows to fix shadow-reversal bug and GPU lag */}
                   <Suspense fallback={null}>
                     <Airplane3D isForward={isForward} />
                   </Suspense>
                 </Canvas>
+                
+                {/* Flawless zero-cost CSS shadow dropped exactly onto the HTML text! Never lags and has no turning bugs */}
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-[70%] h-[15%] bg-black/30 blur-[8px] rounded-[100%] pointer-events-none" />
               </div>
             </div>
           </div>

@@ -58,13 +58,12 @@ const BACKGROUND_WORDS = [
 
 export default function TemplatesShowcase() {
   const [activeTheme, setActiveTheme] = useState('title');
+  const [showGlow, setShowGlow] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
-  const cloudRefs = useRef<(HTMLDivElement | null)[]>([]); // For the content layers
-  const wallRefs = useRef<(HTMLDivElement | null)[]>([]);  // For the background layers
-  const parallaxInnersRef = useRef<(HTMLDivElement | null)[]>([]);
   const titleTextRef = useRef<HTMLDivElement>(null);
   const bgWordsRef = useRef<HTMLDivElement>(null);
   const abyssRef = useRef<HTMLDivElement>(null);
+  const circuitsRef = useRef<HTMLDivElement>(null);
 
   const titleLetters = "TEMPLATES".split("");
 
@@ -72,10 +71,16 @@ export default function TemplatesShowcase() {
   const holeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    setShowGlow(window.innerWidth >= 1024);
+
+    if (typeof window !== 'undefined' && (window.matchMedia('(hover: none)').matches || window.innerWidth < 1024)) return;
+
     let rafId: number;
 
     const updateHoles = () => {
-      wallRefs.current.forEach(wallEl => {
+      if (!containerRef.current) return;
+      const walls = gsap.utils.toArray('.template-wall', containerRef.current) as HTMLDivElement[];
+      walls.forEach(wallEl => {
         if (!wallEl) return;
         const rect = wallEl.getBoundingClientRect();
         const localX = mousePos.current.x - rect.left;
@@ -85,22 +90,31 @@ export default function TemplatesShowcase() {
       });
     };
 
+    let lastHoleUpdate = 0;
     const handleMouseMove = (e: MouseEvent) => {
       mousePos.current = { x: e.clientX, y: e.clientY };
       if (rafId) cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(updateHoles);
 
-      // Open hole
-      wallRefs.current.forEach(wallEl => {
-        if (wallEl) gsap.to(wallEl, { '--hole-radius': '80px', duration: 0.3, ease: 'power2.out' });
-      });
+      const now = performance.now();
+      if (now - lastHoleUpdate > 32) {
+        lastHoleUpdate = now;
+        if (containerRef.current) {
+          const walls = gsap.utils.toArray('.template-wall', containerRef.current) as HTMLDivElement[];
+          walls.forEach(wallEl => {
+            if (wallEl) gsap.to(wallEl, { '--hole-radius': '80px', duration: 0.3, ease: 'power2.out' });
+          });
+        }
+      }
 
-      // Close hole after 0.5 seconds of inactivity
       if (holeTimeoutRef.current) clearTimeout(holeTimeoutRef.current);
       holeTimeoutRef.current = setTimeout(() => {
-        wallRefs.current.forEach(wallEl => {
-          if (wallEl) gsap.to(wallEl, { '--hole-radius': '0px', duration: 0.6, ease: 'power2.inOut' });
-        });
+        if (containerRef.current) {
+          const walls = gsap.utils.toArray('.template-wall', containerRef.current) as HTMLDivElement[];
+          walls.forEach(wallEl => {
+            if (wallEl) gsap.to(wallEl, { '--hole-radius': '0px', duration: 0.6, ease: 'power2.inOut' });
+          });
+        }
       }, 500);
     };
 
@@ -121,33 +135,69 @@ export default function TemplatesShowcase() {
   }, []);
 
   useEffect(() => {
+    let isChecking = false;
+
     const hideOverlappingWords = () => {
-      if (!titleTextRef.current || !bgWordsRef.current) return;
+      if (isChecking || !titleTextRef.current || !bgWordsRef.current) return;
+      isChecking = true;
 
-      const titleBox = titleTextRef.current.getBoundingClientRect();
-      const padding = 10;
-
-      const words = bgWordsRef.current.querySelectorAll('.bg-word');
-
-      words.forEach((word) => {
-        const wordBox = word.getBoundingClientRect();
-        const isOverlapping = !(
-          wordBox.right < titleBox.left - padding ||
-          wordBox.left > titleBox.right + padding ||
-          wordBox.bottom < titleBox.top - padding ||
-          wordBox.top > titleBox.bottom + padding
-        );
-
-        if (isOverlapping) {
-          (word as HTMLElement).style.visibility = 'hidden';
-        } else {
-          (word as HTMLElement).style.visibility = 'visible';
+      requestAnimationFrame(() => {
+        if (!titleTextRef.current || !bgWordsRef.current) {
+          isChecking = false;
+          return;
         }
+
+        const titleBox = titleTextRef.current.getBoundingClientRect();
+        
+        const padX = window.innerWidth < 1024 ? 10 : 20;
+        const padY = window.innerWidth < 1024 ? 40 : 30; 
+        
+        const words = Array.from(bgWordsRef.current.querySelectorAll('.bg-word')) as HTMLElement[];
+        const wordBoxes = words.map(word => word.getBoundingClientRect());
+        
+        const visibilityStates = wordBoxes.map(wordBox => {
+          const isOverlapping = !(
+            wordBox.right < titleBox.left - padX ||
+            wordBox.left > titleBox.right + padX ||
+            wordBox.bottom < titleBox.top - padY ||
+            wordBox.top > titleBox.bottom + padY
+          );
+          return isOverlapping ? 'hidden' : 'visible';
+        });
+
+        words.forEach((word, index) => {
+          if (word.style.visibility !== visibilityStates[index]) {
+            word.style.visibility = visibilityStates[index];
+          }
+        });
+
+        isChecking = false;
       });
     };
 
+    document.fonts.ready.then(() => {
+      hideOverlappingWords();
+    });
     setTimeout(hideOverlappingWords, 100);
-    window.addEventListener('resize', hideOverlappingWords);
+    setTimeout(hideOverlappingWords, 500);
+
+    const handleResize = () => {
+      hideOverlappingWords();
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    const observer = new MutationObserver(() => {
+      hideOverlappingWords();
+    });
+
+    if (bgWordsRef.current) {
+      observer.observe(bgWordsRef.current, {
+        characterData: true,
+        childList: true,
+        subtree: true
+      });
+    }
 
     const glitchInterval = setInterval(() => {
       if (!bgWordsRef.current) return;
@@ -168,7 +218,6 @@ export default function TemplatesShowcase() {
           if (!wordEl.isConnected) return;
           const randomNewWord = BACKGROUND_WORDS[Math.floor(Math.random() * BACKGROUND_WORDS.length)];
           wordEl.textContent = randomNewWord;
-          hideOverlappingWords();
         }, 150);
 
         setTimeout(() => {
@@ -180,8 +229,9 @@ export default function TemplatesShowcase() {
     }, 400);
 
     return () => {
-      window.removeEventListener('resize', hideOverlappingWords);
+      window.removeEventListener('resize', handleResize);
       clearInterval(glitchInterval);
+      observer.disconnect();
     };
   }, []);
 
@@ -192,20 +242,23 @@ export default function TemplatesShowcase() {
       scrollTrigger: {
         trigger: containerRef.current,
         start: "top top",
-        end: "bottom bottom",
+        end: () => `+=${window.innerHeight * 7}`,
         scrub: 1,
       }
     });
 
-    gsap.set(cloudRefs.current[0], { x: "-100vw" });
-    gsap.set(cloudRefs.current[1], { x: "100vw" });
-    gsap.set(cloudRefs.current[2], { x: "100vw" });
-    gsap.set(cloudRefs.current[3], { x: "100vw" });
-    gsap.set(wallRefs.current[0], { x: "-100vw" });
-    gsap.set(wallRefs.current[1], { x: "100vw" });
-    gsap.set(wallRefs.current[2], { x: "100vw" });
-    gsap.set(wallRefs.current[3], { x: "100vw" });
+    const clouds = gsap.utils.toArray('.template-cloud', containerRef.current) as HTMLDivElement[];
+    const walls = gsap.utils.toArray('.template-wall', containerRef.current) as HTMLDivElement[];
+    const inners = gsap.utils.toArray('.template-inner', containerRef.current) as HTMLDivElement[];
+
+    if (clouds.length < 4 || walls.length < 4 || inners.length < 3) return;
+
+    gsap.set(clouds, { x: "100vw" });
+    gsap.set(clouds[0], { x: "-100vw" });
+    gsap.set(walls, { x: "100vw" });
+    gsap.set(walls[0], { x: "-100vw" });
     gsap.set(abyssRef.current, { opacity: 0 });
+    gsap.set(circuitsRef.current, { opacity: 0 });
 
     const scatterPos = [
       { x: "-150vw", y: "-150vh", rotation: -45, scale: 5 },
@@ -219,7 +272,7 @@ export default function TemplatesShowcase() {
       { x: "150vw", y: "0vh", rotation: 90, scale: 5 },
     ];
 
-    const letters = document.querySelectorAll('.template-letter');
+    const letters = gsap.utils.toArray('.template-letter', containerRef.current) as HTMLSpanElement[];
     letters.forEach((letter, i) => {
       gsap.set(letter, {
         x: scatterPos[i]?.x || "0vw",
@@ -230,55 +283,59 @@ export default function TemplatesShowcase() {
       });
     });
 
-    tl.to(abyssRef.current, { opacity: 1, ease: "power1.inOut", duration: 3 }, 3.0);
-    tl.to(wallRefs.current[0], { x: "0vw", ease: "power1.inOut", duration: 3 }, 0);
-    tl.to(cloudRefs.current[0], { x: "0vw", ease: "power1.inOut", duration: 3 }, 0);
-    tl.to(letters, { x: 0, y: 0, rotation: 0, scale: 1, opacity: 1, duration: 2.0, stagger: 0.1, ease: "power2.out" }, 2.0);
-    tl.to(bgWordsRef.current, { opacity: 1, duration: 2.0 }, 4.5);
-    tl.to({}, { duration: 2.0 }, 6.5);
+    tl.to(abyssRef.current, { opacity: 1, ease: "power1.inOut", duration: 2.0 }, 4.0);
+    tl.to(walls[0], { x: "0vw", ease: "power1.inOut", duration: 2.5 }, 4.0);
+    tl.to(clouds[0], { x: "0vw", ease: "power1.inOut", duration: 2.5 }, 4.0);
+    tl.to(letters, { x: 0, y: 0, rotation: 0, scale: 1, opacity: 1, duration: 2.0, stagger: 0.1, ease: "power2.out" }, 5.5);
+    tl.to(bgWordsRef.current, { opacity: 1, duration: 2.0 }, 7.5);
+    tl.to({}, { duration: 2.0 }, 9.5);
 
-    // Cloud 1 Enters, Cloud 0 Exits
-    tl.to(wallRefs.current[1], { x: "0vw", ease: "power1.inOut", duration: 3 }, 8.0);
-    tl.to(wallRefs.current[0], { x: "-100vw", ease: "power1.inOut", duration: 3 }, 8.0); // BGs push each other
-    tl.to(cloudRefs.current[1], { x: "0vw", ease: "power1.inOut", duration: 3, onStart: () => setActiveTheme('cafe'), onReverseComplete: () => setActiveTheme('title') }, 8.0);
-    tl.to(cloudRefs.current[0], { autoAlpha: 0, duration: 2 }, 8.0); // Content stays stacked but fades out
+    tl.to(walls[1], { x: "0vw", ease: "power1.inOut", duration: 3 }, 11.0);
+    tl.to(walls[0], { x: "-100vw", ease: "power1.inOut", duration: 3 }, 11.0);
+    tl.to(clouds[1], { x: "0vw", ease: "power1.inOut", duration: 3, onStart: () => setActiveTheme('cafe'), onReverseComplete: () => setActiveTheme('title') }, 11.0);
+    tl.to(clouds[0], { autoAlpha: 0, duration: 2 }, 11.0);
 
-    tl.to(titleTextRef.current, { autoAlpha: 0, duration: 1.5 }, 8.5);
-    tl.to({}, { duration: 3 }, 11.0);
+    tl.to(titleTextRef.current, { autoAlpha: 0, duration: 1.5 }, 11.5);
+    tl.to(bgWordsRef.current, { autoAlpha: 0, duration: 1.5 }, 11.5);
+    tl.to(circuitsRef.current, { opacity: 0.4, ease: "power1.inOut", duration: 2.0 }, 11.5);
+    tl.to({}, { duration: 3 }, 14.0);
 
-    // Cloud 2 Enters, Cloud 1 Exits
-    tl.to(wallRefs.current[2], { x: "0vw", ease: "power1.inOut", duration: 3 }, 14.0);
-    tl.to(wallRefs.current[1], { x: "-100vw", ease: "power1.inOut", duration: 3 }, 14.0); // BGs push each other
-    tl.to(cloudRefs.current[2], { x: "0vw", ease: "power1.inOut", duration: 3, onStart: () => setActiveTheme('resort'), onReverseComplete: () => setActiveTheme('cafe') }, 14.0);
-    tl.to(cloudRefs.current[1], { autoAlpha: 0, duration: 2 }, 14.0); // Content stays stacked but fades out
+    // Cloud 2 Enters
+    tl.to(walls[2], { x: "0vw", ease: "power1.inOut", duration: 3 }, 17.0);
+    tl.to(clouds[2], { x: "0vw", ease: "power1.inOut", duration: 3 }, 17.0);
+    // Cloud 1 Fades out
+    tl.to(clouds[1], { autoAlpha: 0, duration: 2 }, 17.0); 
 
-    tl.to(parallaxInnersRef.current[1], { autoAlpha: 0, duration: 1.5 }, 14.5);
-    tl.to({}, { duration: 3 }, 17.0);
+    // Cloud 3 Enters
+    tl.to(walls[3], { x: "0vw", ease: "power1.inOut", duration: 3 }, 23.0);
+    tl.to(clouds[3], { x: "0vw", ease: "power1.inOut", duration: 3 }, 23.0);
+    // Cloud 2 Fades out
+    tl.to(clouds[2], { autoAlpha: 0, duration: 2 }, 23.0); 
 
-    // Cloud 3 Enters, Cloud 2 Exits
-    tl.to(wallRefs.current[3], { x: "0vw", ease: "power1.inOut", duration: 3 }, 20.0);
-    tl.to(wallRefs.current[2], { x: "-100vw", ease: "power1.inOut", duration: 3 }, 20.0); // BGs push each other
-    tl.to(cloudRefs.current[3], { x: "0vw", ease: "power1.inOut", duration: 3, onStart: () => setActiveTheme('vet'), onReverseComplete: () => setActiveTheme('resort') }, 20.0);
-    tl.to(cloudRefs.current[2], { autoAlpha: 0, duration: 2 }, 20.0); // Content stays stacked but fades out
-
-    tl.to(parallaxInnersRef.current[2], { autoAlpha: 0, duration: 1.5 }, 20.5);
-    tl.to({}, { duration: 3 }, 23.0);
+    // Cloud 1 Inner Exits
+    tl.to(inners[0], { autoAlpha: 0, duration: 1.5 }, 17.5); 
+    
+    // Cloud 2 Inner Exits
+    tl.to(inners[1], { autoAlpha: 0, duration: 1.5 }, 23.5); 
+    
+    // Pad the end so the last card stays visible before section unpins
+    tl.to({}, { duration: 3 }, 26.0);
   }, { scope: containerRef });
 
   return (
-    <section id="templates" ref={containerRef} className="relative w-full h-[800vh] bg-transparent z-20 -mt-[150vh]">
+    <section id="templates" ref={containerRef} className="relative w-full bg-transparent z-20 -mt-[350vh]" style={{ height: "800vh" }}>
       <style>{`
         @keyframes templateMarquee {
           0% { transform: translateX(0); }
           100% { transform: translateX(-50%); }
         }
         @keyframes text-glitch-swap {
-          0% { transform: skew(0deg); text-shadow: none; opacity: 1; filter: blur(0px); }
-          20% { transform: skew(-10deg) translate(-2px, 1px); text-shadow: 2px 0px #f59e0b, -2px 0px #00e5ff; opacity: 0.8; filter: blur(1px); }
-          40% { transform: skew(10deg) translate(2px, -1px); text-shadow: -2px 0px #f59e0b, 2px 0px #00e5ff; opacity: 1; filter: blur(0px); }
-          60% { transform: skew(-5deg) translate(-1px, -2px); text-shadow: 2px 0px #f59e0b, -2px 0px #00e5ff; opacity: 0.5; filter: blur(1px); }
-          80% { transform: skew(5deg) translate(1px, 2px); text-shadow: -2px 0px #f59e0b, 2px 0px #00e5ff; opacity: 1; filter: blur(0px); }
-          100% { transform: skew(0deg); text-shadow: none; opacity: 1; filter: blur(0px); }
+          0% { transform: skew(0deg); text-shadow: none; opacity: 1; }
+          20% { transform: skew(-10deg) translate(-2px, 1px); text-shadow: 2px 0px #f59e0b, -2px 0px #00e5ff; opacity: 0.8; }
+          40% { transform: skew(10deg) translate(2px, -1px); text-shadow: -2px 0px #f59e0b, 2px 0px #00e5ff; opacity: 1; }
+          60% { transform: skew(-5deg) translate(-1px, -2px); text-shadow: 2px 0px #f59e0b, -2px 0px #00e5ff; opacity: 0.5; }
+          80% { transform: skew(5deg) translate(1px, 2px); text-shadow: -2px 0px #f59e0b, 2px 0px #00e5ff; opacity: 1; }
+          100% { transform: skew(0deg); text-shadow: none; opacity: 1; }
         }
         .glitch-active {
           animation: text-glitch-swap 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
@@ -293,8 +350,8 @@ export default function TemplatesShowcase() {
         {/* GLOBAL ABYSS AND CIRCUIT TRACES */}
         {/* Rendered exactly once, sits fixed in the background behind all sliding clouds */}
         <div ref={abyssRef} className="absolute inset-0 w-full h-full pointer-events-none z-[5] bg-[#09090b]">
-          <div className="absolute inset-0 opacity-10 mix-blend-screen">
-            <TemplateCircuits color="#f59e0b" glow={true} />
+          <div ref={circuitsRef} className="hidden lg:block absolute inset-0 opacity-0 mix-blend-screen">
+            <TemplateCircuits color="#f59e0b" glow={showGlow} />
           </div>
         </div>
 
@@ -305,33 +362,31 @@ export default function TemplatesShowcase() {
           >
             {/* BACKGROUND LAYER (Slides left on exit) */}
             <div
-              ref={el => { wallRefs.current[i] = el; }}
-              className="absolute inset-0 w-full h-full pointer-events-none z-[10]"
+              className="template-wall absolute inset-0 w-full h-full pointer-events-none z-[10]"
               style={{
-                willChange: "transform",
-                background: template.isTitle ? "transparent" : "radial-gradient(circle var(--hole-radius, 0px) at var(--mouse-x, -1000px) var(--mouse-y, -1000px), transparent 0%, transparent 80%, #f4f4f5 100%)",
+                background: template.isTitle 
+                  ? "transparent" 
+                  : (showGlow 
+                      ? "radial-gradient(circle var(--hole-radius, 0px) at var(--mouse-x, -1000px) var(--mouse-y, -1000px), transparent 0%, transparent 80%, #f4f4f5 100%)" 
+                      : "#f4f4f5"),
               }}
             >
               {template.isTitle && (
-                <div className="absolute inset-0 w-full h-full" style={{ filter: "blur(60px)", transform: "scale(1.2)" }}>
-                  <div
-                    className="w-full h-full bg-[#050507]"
-                    style={{ clipPath: "polygon(0% 0%, 100% 0%, 93% 50%, 100% 100%, 0% 100%)" }}
-                  />
-                </div>
+                <div 
+                  className="absolute inset-0 w-full h-full" 
+                  style={{ background: "radial-gradient(ellipse at center, rgba(5,5,7,1) 0%, rgba(5,5,7,0.9) 30%, rgba(5,5,7,0) 70%)", transform: "scale(1.2)" }} 
+                />
               )}
             </div>
 
             {/* CONTENT LAYER (Stays fixed on exit, gets swallowed) */}
             <div
-              ref={el => { cloudRefs.current[i] = el; }}
-              className="relative z-20 flex items-center justify-center w-full h-full"
-              style={{ willChange: "transform" }}
+              className="template-cloud relative z-20 flex items-center justify-center w-full h-full"
             >
               {template.isTitle ? (
                 <div className="relative flex items-center justify-center w-[100vw] h-full">
                   <div ref={bgWordsRef} className="absolute inset-0 z-0 flex flex-wrap content-start justify-between gap-x-4 md:gap-x-8 gap-y-3 md:gap-y-5 opacity-0 pointer-events-none p-4 md:p-8 overflow-hidden">
-                    {[...Array(10)].flatMap(() => BACKGROUND_WORDS).map((word, idx) => (
+                    {[...Array(showGlow ? 10 : 4)].flatMap(() => BACKGROUND_WORDS).map((word, idx) => (
                       <span key={idx} className="bg-word font-heading text-xs md:text-sm lg:text-lg font-black uppercase text-white tracking-[0.2em] select-none whitespace-nowrap text-center">
                         {word}
                       </span>
@@ -341,7 +396,7 @@ export default function TemplatesShowcase() {
                   <div ref={titleTextRef} className="relative pointer-events-auto z-20 flex items-center justify-center overflow-visible">
                     <h1 className="font-heading text-5xl sm:text-6xl md:text-[150px] lg:text-[180px] font-black uppercase tracking-tighter text-white leading-none select-none flex">
                       {titleLetters.map((char, index) => (
-                        <span key={index} className="template-letter inline-block origin-center will-change-transform">
+                        <span key={index} className="template-letter inline-block origin-center">
                           {char}
                         </span>
                       ))}
@@ -350,7 +405,7 @@ export default function TemplatesShowcase() {
                 </div>
               ) : (
                 <div className="relative w-[100vw] h-full flex items-center justify-center">
-                  <div ref={el => { parallaxInnersRef.current[i] = el; }} className="relative w-[95vw] md:w-[85vw] max-w-[1400px] pointer-events-auto z-20 flex flex-col md:flex-row items-center justify-between p-4 md:p-12 gap-12 lg:gap-24">
+                  <div className="template-inner relative w-[95vw] md:w-[85vw] max-w-[1400px] pointer-events-auto z-20 flex flex-col md:flex-row items-center justify-between p-4 md:p-12 gap-12 lg:gap-24">
                     <div className="w-full md:w-1/3 flex flex-col items-start justify-center text-left">
                       <p className="font-mono text-xs md:text-sm tracking-[0.3em] text-[#09090b]/50 uppercase mb-4">Template Architecture</p>
                       <h3 className="font-heading text-4xl md:text-6xl lg:text-7xl font-black text-[#09090b] uppercase tracking-tighter mb-6 leading-[0.9]">{template.title}</h3>
@@ -378,7 +433,7 @@ export default function TemplatesShowcase() {
                     </div>
 
                     <div className="relative w-full md:w-2/3 flex items-center justify-center group">
-                      <div className="relative w-[90%] md:w-full max-w-[800px] aspect-[16/10] bg-zinc-900 rounded-xl md:rounded-3xl border-[4px] md:border-[8px] border-zinc-800 shadow-[0_32px_80px_rgba(0,0,0,0.4)] flex flex-col z-10 transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-[0.98] group-hover:opacity-60 group-hover:blur-sm">
+                      <div className="relative w-[90%] md:w-full max-w-[800px] aspect-[16/10] bg-zinc-900 rounded-xl md:rounded-3xl border-[4px] md:border-[8px] border-zinc-800 shadow-[0_32px_80px_rgba(0,0,0,0.4)] flex flex-col z-10 transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] md:group-hover:scale-[0.98] md:group-hover:opacity-60 md:group-hover:blur-sm">
                         <div className="w-full h-4 md:h-6 bg-zinc-900 rounded-t-xl md:rounded-t-2xl flex items-center justify-center shrink-0">
                           <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-black rounded-full shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]" />
                         </div>
@@ -390,7 +445,7 @@ export default function TemplatesShowcase() {
                         <div className="absolute -bottom-8 md:-bottom-14 left-1/2 -translate-x-1/2 w-32 md:w-56 h-2 md:h-3 bg-zinc-800 rounded-full shadow-2xl -z-10" />
                       </div>
 
-                      <div className="absolute -right-2 md:-right-8 -bottom-8 md:-bottom-16 w-[35%] max-w-[220px] aspect-[9/19] bg-zinc-950 rounded-[1.5rem] md:rounded-[2.5rem] border-[4px] md:border-[8px] border-zinc-800 shadow-[0_40px_100px_rgba(0,0,0,0.6)] flex flex-col overflow-hidden z-20 cursor-pointer transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] scale-100 translate-x-0 translate-y-0 group-hover:right-1/2 group-hover:bottom-1/2 group-hover:translate-x-1/2 group-hover:translate-y-1/2 group-hover:scale-[1.3] md:group-hover:scale-[1.6] group-hover:shadow-[0_60px_120px_rgba(0,0,0,0.8)]">
+                      <div className="absolute -right-2 md:-right-8 -bottom-8 md:-bottom-16 w-[35%] max-w-[220px] aspect-[9/19] bg-zinc-950 rounded-[1.5rem] md:rounded-[2.5rem] border-[4px] md:border-[8px] border-zinc-800 shadow-[0_40px_100px_rgba(0,0,0,0.6)] flex flex-col overflow-hidden z-20 cursor-pointer transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] scale-100 translate-x-0 translate-y-0 md:group-hover:right-1/2 md:group-hover:bottom-1/2 md:group-hover:translate-x-1/2 md:group-hover:translate-y-1/2 md:group-hover:scale-[1.6] md:group-hover:shadow-[0_60px_120px_rgba(0,0,0,0.8)]">
                         <div className="w-full h-full bg-white relative">
                           <img src={template.mobileImage} className="absolute inset-0 w-full h-full object-cover object-center" alt={`${template.title} Mobile`} />
                         </div>

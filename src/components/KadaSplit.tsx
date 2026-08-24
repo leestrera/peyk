@@ -217,8 +217,8 @@ export default function KadaSplit() {
         tl.to(kadaRef.current, { x: 0, opacity: 1, duration: 2, ease: "power2.out" }, 0);
         
         // 5. Tension: Phones drift apart in 3D space
-        tl.to(phone1Ref.current, { x: -40, y: -20, rotationY: -15, z: -80, opacity: 0.9, duration: 3, ease: "none" }, 1);
-        tl.to(phone2Ref.current, { x: 40, y: 20, rotationY: 15, z: 20, duration: 3, ease: "none" }, 1);
+        tl.to(phone1Ref.current, { x: "-8vw", y: "-2vh", rotationY: -15, z: -80, opacity: 0.9, duration: 3, ease: "none" }, 1);
+        tl.to(phone2Ref.current, { x: "8vw", y: "2vh", rotationY: 15, z: 20, duration: 3, ease: "none" }, 1);
 
         // 6. Impact: "SPLIT" strikes
         tl.to(splitRef.current, { x: 0, opacity: 1, duration: 1.5, ease: "power4.out" }, 4);
@@ -295,7 +295,7 @@ export default function KadaSplit() {
             {BLOCKS.map((block, i) => (
               <div 
                 key={`block-${i}`}
-                className="bg-block-scroll absolute z-10 will-change-transform [transform-style:preserve-3d]"
+                className="bg-block-scroll absolute z-10  [transform-style:preserve-3d]"
                 style={{
                   top: block.top,
                   left: block.left,
@@ -305,7 +305,7 @@ export default function KadaSplit() {
                 }}
               >
                 <div 
-                  className="bg-block-mouse w-full h-full will-change-transform [transform-style:preserve-3d]"
+                  className="bg-block-mouse w-full h-full  [transform-style:preserve-3d]"
                   style={{
                     width: block.size,
                     height: block.size,
@@ -321,14 +321,14 @@ export default function KadaSplit() {
             {GLASS_PANES.map((glass, i) => (
               <div 
                 key={`glass-${i}`}
-                className="bg-glass-scroll absolute z-20 will-change-transform"
+                className="bg-glass-scroll absolute z-20 hidden md:block"
                 style={{
                   top: glass.top,
                   left: glass.left,
                 }}
               >
                 <div
-                  className="bg-glass-mouse w-full h-full will-change-transform"
+                  className="bg-glass-mouse w-full h-full "
                   style={{
                     width: glass.w,
                     height: glass.h,
@@ -349,7 +349,7 @@ export default function KadaSplit() {
         </div>
 
         {/* TEXT WRAPPER - Centered vertically and positioned absolute so it can fly away */}
-        <div ref={textWrapperRef} className="absolute inset-0 flex flex-col justify-center px-8 md:px-24 z-20 will-change-transform">
+        <div ref={textWrapperRef} className="absolute inset-0 flex flex-col justify-center px-8 md:px-24 z-20 ">
           <span className="font-mono text-xs tracking-widest text-peyk-silver uppercase mb-4">Proprietary Product</span>
           <div className="flex flex-col">
             <h2 ref={kadaRef} className="font-heading text-7xl md:text-9xl lg:text-[10vw] font-black uppercase tracking-tighter text-white leading-[0.85]">
@@ -361,28 +361,27 @@ export default function KadaSplit() {
           </div>
         </div>
 
-        {/* PHONES (Right) - Wrapper for dropping */}
-        <div ref={phonesSlideWrapperRef} className="absolute inset-0 w-full h-full pointer-events-none z-30 will-change-transform">
+        <div ref={phonesSlideWrapperRef} className="absolute inset-0 w-full h-full pointer-events-none z-30 [perspective:1200px] [transform-style:preserve-3d] will-change-transform">
           {/* Phone 1 */}
-          <div ref={phone1Ref} className="absolute right-[10%] md:right-[20%] top-[25%] md:top-[28%] h-[45vh] lg:h-[55vh] z-10 will-change-transform">
-            <img src="/assets/images/kadasplit_slices/Slice 1.png" alt="KadaSplit 1" className="h-full w-auto object-contain" />
+          <div ref={phone1Ref} className="absolute right-[10%] md:right-[20%] top-[25%] md:top-[28%] h-[45svh] lg:h-[55vh] w-[calc(45svh*2580/5592)] lg:w-[calc(55vh*2580/5592)] z-10 will-change-transform">
+            <img src="/assets/images/kadasplit_slices/Slice 1.png" alt="KadaSplit 1" className="h-full w-full object-contain" />
             <HoneyDrip />
           </div>
           
           {/* Phone 2 (Slice 7) */}
-          <div ref={phone2Ref} className="absolute right-[5%] md:right-[10%] top-[20%] md:top-[22%] h-[45vh] lg:h-[55vh] z-20 will-change-transform">
-            <img src="/assets/images/kadasplit_slices/Slice 7.png" alt="KadaSplit 7" className="h-full w-auto object-contain" />
+          <div ref={phone2Ref} className="absolute right-[5%] md:right-[10%] top-[20%] md:top-[22%] h-[45svh] lg:h-[55vh] w-[calc(45svh*2580/5592)] lg:w-[calc(55vh*2580/5592)] z-20 will-change-transform">
+            <img src="/assets/images/kadasplit_slices/Slice 7.png" alt="KadaSplit 7" className="h-full w-full object-contain" />
           </div>
         </div>
 
         {/* MARQUEE WRAPPER - Centered exactly in the middle of the screen! */}
         {/* Placed at its final destination on mount so getBoundingClientRect perfectly measures the slots. */}
         <div ref={marqueeWrapperRef} className="absolute top-1/2 -translate-y-1/2 left-0 w-full z-10 flex items-center pl-8 md:pl-24 will-change-transform">
-          <div ref={marqueeRef} className="flex gap-0 [perspective:1200px] [transform-style:preserve-3d] will-change-transform">
+          <div ref={marqueeRef} className="flex gap-0 [perspective:1200px] will-change-transform">
             
             {/* Slot 1: Ghost 1 (Slice 1) */}
-            <div ref={ghost1Ref} className="h-[45vh] lg:h-[55vh] shrink-0 pointer-events-none relative">
-              <img src="/assets/images/kadasplit_slices/Slice 1.png" className="h-full w-auto opacity-0" />
+            <div ref={ghost1Ref} className="h-[45svh] lg:h-[55vh] shrink-0 pointer-events-none relative w-[calc(45svh*2580/5592)] lg:w-[calc(55vh*2580/5592)]">
+              <img src="/assets/images/kadasplit_slices/Slice 1.png" className="h-full w-full opacity-0" loading="lazy" decoding="async" />
             </div>
             
             {/* Slot 2-6: Slices 2-6 */}
@@ -390,16 +389,16 @@ export default function KadaSplit() {
               <div 
                 key={sliceNum} 
                 ref={(el) => { slicesRef.current[i] = el; }}
-                className="relative h-[45vh] lg:h-[55vh] shrink-0"
+                className="relative h-[45svh] lg:h-[55vh] shrink-0 w-[calc(45svh*2580/5592)] lg:w-[calc(55vh*2580/5592)]"
               >
-                <img src={`/assets/images/kadasplit_slices/Slice ${sliceNum}.png`} alt={`KadaSplit ${sliceNum}`} className="h-full w-auto object-contain" />
+                <img src={`/assets/images/kadasplit_slices/Slice ${sliceNum}.png`} alt={`KadaSplit ${sliceNum}`} className="h-full w-full object-contain" loading="lazy" decoding="async" />
                 {[1, 5, 6, 8, 9, 10].includes(sliceNum) && <HoneyDrip />}
               </div>
             ))}
 
             {/* Slot 7: Ghost 2 (Slice 7) */}
-            <div ref={ghost2Ref} className="h-[45vh] lg:h-[55vh] shrink-0 pointer-events-none">
-              <img src="/assets/images/kadasplit_slices/Slice 7.png" className="h-full w-auto opacity-0" />
+            <div ref={ghost2Ref} className="h-[45svh] lg:h-[55vh] shrink-0 pointer-events-none w-[calc(45svh*2580/5592)] lg:w-[calc(55vh*2580/5592)]">
+              <img src="/assets/images/kadasplit_slices/Slice 7.png" className="h-full w-full opacity-0" loading="lazy" decoding="async" />
             </div>
 
             {/* Slot 8-10: Slices 8-10 */}
@@ -407,9 +406,9 @@ export default function KadaSplit() {
               <div 
                 key={sliceNum} 
                 ref={(el) => { slicesRef.current[i + 5] = el; }}
-                className="relative h-[45vh] lg:h-[55vh] shrink-0"
+                className="relative h-[45svh] lg:h-[55vh] shrink-0 w-[calc(45svh*2580/5592)] lg:w-[calc(55vh*2580/5592)]"
               >
-                <img src={`/assets/images/kadasplit_slices/Slice ${sliceNum}.png`} alt={`KadaSplit ${sliceNum}`} className="h-full w-auto object-contain" />
+                <img src={`/assets/images/kadasplit_slices/Slice ${sliceNum}.png`} alt={`KadaSplit ${sliceNum}`} className="h-full w-full object-contain" loading="lazy" decoding="async" />
                 {[1, 5, 6, 8, 9, 10].includes(sliceNum) && <HoneyDrip />}
               </div>
             ))}
@@ -419,9 +418,9 @@ export default function KadaSplit() {
               <div 
                 key={`dup1-${sliceNum}`} 
                 ref={(el) => { slicesRef.current[i + 8] = el; }}
-                className="relative h-[45vh] lg:h-[55vh] shrink-0"
+                className="relative h-[45svh] lg:h-[55vh] shrink-0 w-[calc(45svh*2580/5592)] lg:w-[calc(55vh*2580/5592)]"
               >
-                <img src={`/assets/images/kadasplit_slices/Slice ${sliceNum}.png`} alt={`KadaSplit ${sliceNum}`} className="h-full w-auto object-contain" />
+                <img src={`/assets/images/kadasplit_slices/Slice ${sliceNum}.png`} alt={`KadaSplit ${sliceNum}`} className="h-full w-full object-contain" loading="lazy" decoding="async" />
                 {[1, 5, 6, 8, 9, 10].includes(sliceNum) && <HoneyDrip />}
               </div>
             ))}
@@ -431,9 +430,9 @@ export default function KadaSplit() {
               <div 
                 key={`dup2-${sliceNum}`} 
                 ref={(el) => { slicesRef.current[i + 18] = el; }}
-                className="relative h-[45vh] lg:h-[55vh] shrink-0"
+                className="relative h-[45svh] lg:h-[55vh] shrink-0 w-[calc(45svh*2580/5592)] lg:w-[calc(55vh*2580/5592)]"
               >
-                <img src={`/assets/images/kadasplit_slices/Slice ${sliceNum}.png`} alt={`KadaSplit ${sliceNum}`} className="h-full w-auto object-contain" />
+                <img src={`/assets/images/kadasplit_slices/Slice ${sliceNum}.png`} alt={`KadaSplit ${sliceNum}`} className="h-full w-full object-contain" loading="lazy" decoding="async" />
                 {[1, 5, 6, 8, 9, 10].includes(sliceNum) && <HoneyDrip />}
               </div>
             ))}

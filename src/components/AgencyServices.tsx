@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -19,10 +20,24 @@ const SERVICES = [
 function LoopingTitle({ titles }: { titles: string[] }) {
   const [index, setIndex] = useState(0);
   const textRef = useRef<HTMLSpanElement>(null);
+  const containerRef = useRef<HTMLHeadingElement>(null);
+  const isVisibleRef = useRef(false);
+
+  // Only run the looping interval when the card is actually visible
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { isVisibleRef.current = entry.isIntersecting; },
+      { rootMargin: '100px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
-      if (!textRef.current) return;
+      if (!textRef.current || !isVisibleRef.current) return; // Skip work when off-screen
       gsap.to(textRef.current, {
         opacity: 0,
         y: -10,
@@ -42,7 +57,7 @@ function LoopingTitle({ titles }: { titles: string[] }) {
   }, [titles]);
 
   return (
-    <h2 className="font-heading text-3xl md:text-4xl font-black uppercase tracking-tighter text-white leading-tight flex-1 flex items-center justify-center text-center px-4">
+    <h2 ref={containerRef} className="font-heading text-3xl md:text-4xl font-black uppercase tracking-tighter text-white leading-tight flex-1 flex items-center justify-center text-center px-4">
        <span ref={textRef} className="block">{titles[index]}</span>
     </h2>
   );
@@ -51,9 +66,11 @@ function LoopingTitle({ titles }: { titles: string[] }) {
 export default function AgencyServices() {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
 
-  useEffect(() => {
+  const hasPreloadedRef = useRef(false);
+  const imagesRef = useRef<HTMLImageElement[]>([]);
+
+  useGSAP(() => {
     if (!canvasRef.current || !containerRef.current) return;
 
     const canvas = canvasRef.current;
@@ -64,22 +81,37 @@ export default function AgencyServices() {
     const currentFrame = (index: number) => 
       `/assets/frames/agency/${String(index + 1).padStart(4, "0")}.jpg`;
 
-    // Preload images
-    const images: HTMLImageElement[] = [];
+    // Deferred Preload: Don't choke initial page load!
     const imageSeq = { frame: 0 };
     
-    // Create an initial image to trigger the first render
-    const initialImg = new Image();
-    initialImg.src = currentFrame(0);
-    
-    for (let i = 0; i < frameCount; i++) {
-      const img = new Image();
-      img.src = currentFrame(i);
-      images.push(img);
+    // Load just the first frame immediately for initial paint
+    if (!imagesRef.current[0]) {
+      const initialImg = new Image();
+      initialImg.src = currentFrame(0);
+      initialImg.onload = () => {
+        imagesRef.current[0] = initialImg;
+        resizeCanvas(); // Render and fit first frame immediately
+      };
     }
+    
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && !hasPreloadedRef.current) {
+        hasPreloadedRef.current = true;
+        // Preload the rest of the 240 frames ONLY when we scroll near this section
+        for (let i = 0; i < frameCount; i++) {
+          if (i === 0) continue; // Already loaded
+          const img = new Image();
+          img.onload = render; // Force render if the scroll timeline is already scrubbed to this frame!
+          img.src = currentFrame(i);
+          imagesRef.current[i] = img;
+        }
+      }
+    }, { rootMargin: "200% 0px" });
+    
+    observer.observe(containerRef.current);
 
     const render = () => {
-      const img = images[imageSeq.frame];
+      const img = imagesRef.current[Math.round(imageSeq.frame)];
       if (!img || !img.complete) return;
 
       const hRatio = canvas.width / img.width;
@@ -117,7 +149,10 @@ export default function AgencyServices() {
     };
 
     window.addEventListener("resize", resizeCanvas);
-    initialImg.onload = resizeCanvas; // Render first frame when loaded
+    // Render first frame when loaded, but if already loaded (HMR), just resize directly
+    if (imagesRef.current[0] && imagesRef.current[0].complete) {
+      resizeCanvas();
+    }
 
     // 1. Master Timeline
     const tl = gsap.timeline({
@@ -125,7 +160,9 @@ export default function AgencyServices() {
         trigger: containerRef.current,
         start: "top top",
         end: "bottom bottom",
-        scrub: 0.5,
+        scrub: true,
+        pin: ".pin-target",
+        pinSpacing: false,
       }
     });
 
@@ -149,7 +186,9 @@ export default function AgencyServices() {
     }, 0);
 
     // 3. Animate Cards (Stacked in center, scaling up and zooming out)
-    cardsRef.current.forEach((card, i) => {
+    const cards = gsap.utils.toArray('.agency-card', containerRef.current) as HTMLDivElement[];
+    
+    cards.forEach((card, i) => {
       if (!card) return;
       
       const isOdd = i % 2 !== 0; 
@@ -175,28 +214,30 @@ export default function AgencyServices() {
         ease: "none"
       }, startTime + durationAppear);
 
-      // Phase 3: Exit left/right while zooming more
-      tl.to(content, {
-        x: exitX,
-        opacity: 0,
-        rotation: isOdd ? -15 : 15,
-        scale: 1.15,
-        duration: durationExit,
-        ease: "power2.in"
-      }, startTime + durationAppear + durationHold);
+      // Phase 3: Exit left/right while zooming more (Skip for the last card so it stays on screen)
+      if (i < SERVICES.length - 1) {
+        tl.to(content, {
+          x: exitX,
+          opacity: 0,
+          rotation: isOdd ? -15 : 15,
+          scale: 1.15,
+          duration: durationExit,
+          ease: "power2.in"
+        }, startTime + durationAppear + durationHold);
+      }
     });
 
     // Cleanup
     return () => {
       window.removeEventListener("resize", resizeCanvas);
-      ScrollTrigger.getAll().forEach(st => st.kill());
+      observer.disconnect();
     };
-  }, []);
+  }, { scope: containerRef });
 
   return (
-    <section id="agency" ref={containerRef} className="relative w-full bg-background z-10 h-[800vh] -mt-[100vh]">
+    <section id="agency" ref={containerRef} className="relative w-full bg-background z-10 -mt-[100vh]" style={{ height: "1000vh" }}>
       
-      <div className="sticky top-0 left-0 w-full h-screen overflow-hidden z-0">
+      <div className="pin-target relative top-0 left-0 w-full h-screen overflow-hidden z-0">
         
         {/* Unified masked container for the video and vignette */}
         <div 
@@ -217,10 +258,11 @@ export default function AgencyServices() {
         {SERVICES.map((service, i) => (
           <div 
             key={service.id} 
-            ref={el => { cardsRef.current[i] = el; }} 
-            className="absolute inset-0 w-full h-full flex items-center justify-center px-4 pointer-events-none z-20"
+            className="agency-card absolute inset-0 w-full h-full flex items-center justify-center px-4 pointer-events-none z-20"
           >
-            <div className="card-content pointer-events-auto w-[75vw] max-w-[320px] aspect-square backdrop-blur-lg bg-black/30 border border-white/10 rounded-none p-6 md:p-8 flex flex-col items-center opacity-0 scale-50">
+            <div 
+              className="card-content pointer-events-auto w-[75vw] max-w-[320px] aspect-square backdrop-blur-lg bg-black/30 border border-white/10 rounded-none p-6 md:p-8 flex flex-col items-center opacity-0 scale-50"
+            >
               
               {/* Static Identifier */}
               <div className="w-full text-center border-b border-white/5 pb-4 mb-2">

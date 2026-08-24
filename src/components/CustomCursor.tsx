@@ -12,6 +12,9 @@ export default function CustomCursor() {
     const inner = innerRef.current;
     const outer = outerRef.current;
     if (!inner || !outer) return;
+    
+    // Disable custom cursor tracking entirely on mobile/touch devices
+    if (typeof window !== 'undefined' && (window.matchMedia('(hover: none)').matches || window.innerWidth < 768)) return;
 
     // Quick setters for performance
     const setInnerX = gsap.quickSetter(inner, "x", "px");
@@ -54,11 +57,11 @@ export default function CustomCursor() {
   }, []);
 
   return (
-    <div className="custom-cursor pointer-events-none fixed inset-0 z-[9999] overflow-hidden">
+    <div className="custom-cursor hidden md:block pointer-events-none fixed inset-0 z-[9999] overflow-hidden">
       {/* Outer Halo */}
       <div
         ref={outerRef}
-        className={`absolute top-0 left-0 rounded-full border border-peyk-glass transition-all will-change-transform
+        className={`absolute top-0 left-0 rounded-full border border-peyk-glass transition-all 
           ${isHovering ? "h-[70px] w-[70px] bg-peyk-silver/10" : "h-[48px] w-[48px]"}
         `}
         style={{
@@ -69,7 +72,7 @@ export default function CustomCursor() {
       {/* Inner Dot */}
       <div
         ref={innerRef}
-        className={`absolute top-0 left-0 h-[26px] w-[26px] rounded-full transition-colors will-change-transform
+        className={`absolute top-0 left-0 h-[26px] w-[26px] rounded-full transition-colors 
           ${isHovering ? "bg-peyk-silver shadow-[0_0_20px_rgba(245,158,11,0.6)]" : "bg-white"}
         `}
       />

@@ -1,11 +1,11 @@
-"use client";
+ "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import MechanicalSpider from "./MechanicalSpider";
 import { LOGO_WHITE_B64 } from "../logoBase64";
+import MechanicalSpider from "./MechanicalSpider";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -16,30 +16,8 @@ export default function ApertureHero() {
   const leftCurtainRef = useRef<HTMLDivElement>(null);
   const rightCurtainRef = useRef<HTMLDivElement>(null);
   const scrollIndicatorRef = useRef<HTMLDivElement>(null);
-  const bugRef = useRef<HTMLDivElement>(null);
-  
-  // Start frozen, only move when preloader gives the signal
-  const [isPatrolling, setIsPatrolling] = useState(false);
-  const preloaderDoneRef = useRef(false);
-
-  useEffect(() => {
-    const handlePreloaderComplete = () => {
-      preloaderDoneRef.current = true;
-      setIsPatrolling(true);
-    };
-    window.addEventListener("preloaderComplete", handlePreloaderComplete);
-    
-    // Fallback just in case preloader fired early or was skipped
-    const timer = setTimeout(() => {
-      preloaderDoneRef.current = true;
-      setIsPatrolling(true);
-    }, 4500); 
-
-    return () => {
-      window.removeEventListener("preloaderComplete", handlePreloaderComplete);
-      clearTimeout(timer);
-    };
-  }, []);
+  const [isPatrolling, setIsPatrolling] = useState(true);
+  const isPatrollingRef = useRef(true);
 
   useGSAP(() => {
     const container = containerRef.current;
@@ -57,6 +35,10 @@ export default function ApertureHero() {
     gsap.set(".glow-overlay", { opacity: 0 });
     gsap.set([leftCurtain, rightCurtain], { xPercent: 0 });
     
+    let startSx = 0;
+    let startSy = 0;
+    let initialRect: DOMRect | null = null;
+    
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: container,
@@ -66,19 +48,27 @@ export default function ApertureHero() {
         pin: true,
         anticipatePin: 1,
         onUpdate: (self) => {
-          // Freeze the bug in its current position when scrolling begins
-          if (self.progress > 0.02) {
-            setIsPatrolling((prev) => {
-              if (prev) return false;
-              return prev;
-            });
-          } else {
-            // Only unfreeze if the preloader is actually done
-            if (preloaderDoneRef.current) {
-              setIsPatrolling((prev) => {
-                if (!prev) return true;
-                return prev;
-              });
+          // Capture the dot's initial rect the first time if needed
+          if (!initialRect) {
+            initialRect = dot.getBoundingClientRect();
+          }
+          
+          // If we scroll down even 1%, stop the spider from roaming so the scale effect takes over
+          const shouldPatrol = self.progress <= 0.01;
+          if (shouldPatrol !== isPatrollingRef.current) {
+            isPatrollingRef.current = shouldPatrol;
+            setIsPatrolling(shouldPatrol);
+            
+            if (!shouldPatrol) {
+              const bugWrapper = dot.querySelector('.bug-wrapper');
+              if (bugWrapper) {
+                // Freeze the spider in its exact current frame
+                gsap.killTweensOf(bugWrapper);
+                const style = window.getComputedStyle(bugWrapper);
+                const matrix = new DOMMatrix(style.transform);
+                startSx = matrix.m41;
+                startSy = matrix.m42;
+              }
             }
           }
         }
@@ -86,12 +76,35 @@ export default function ApertureHero() {
     });
 
     // 1. Text fades out, dot scales up massively and moves to the center. Scroll indicator fades out immediately.
+    const proxy = { p: 0 };
     tl.to(scrollIndicator, { opacity: 0, duration: 0.5, ease: "power2.out" }, 0)
       .to(text, { scale: 1.1, opacity: 0, duration: 2, ease: "power2.inOut" }, 0)
-      .to(bugRef.current, { 
-        scale: 150, // Massive scale to cover the screen from wherever the bug is
-        duration: 2.5, 
-        ease: "power2.inOut" 
+      .to(proxy, {
+        p: 1,
+        duration: 2.5,
+        ease: "power2.inOut",
+        onUpdate: () => {
+          const currentScale = 1 + (149 * proxy.p);
+          if (initialRect) {
+            const cx = window.innerWidth / 2;
+            const cy = window.innerHeight / 2;
+            
+            const spiderScreenX = initialRect.left + initialRect.width / 2 + startSx;
+            const spiderScreenY = initialRect.top + initialRect.height / 2 + startSy;
+            
+            const moveX = (cx - spiderScreenX) * proxy.p;
+            const moveY = (cy - spiderScreenY) * proxy.p;
+            
+            const counterX = startSx * (1 - currentScale);
+            const counterY = startSy * (1 - currentScale);
+            
+            gsap.set(dot, {
+              scale: currentScale,
+              x: moveX + counterX,
+              y: moveY + counterY
+            });
+          }
+        }
       }, 0)
       
       // 2. The Seamless Handover: Eliminate the crossfade drop by using instant SET commands.
@@ -117,13 +130,13 @@ export default function ApertureHero() {
       */}
       <div
         ref={leftCurtainRef}
-        className="pointer-events-none absolute left-0 top-0 z-20 h-full w-1/2 origin-left bg-white will-change-transform"
+        className="pointer-events-none absolute left-0 top-0 z-20 h-full w-1/2 origin-left bg-white "
       >
         <div className="glow-overlay absolute inset-0 bg-background opacity-0" />
       </div>
       <div
         ref={rightCurtainRef}
-        className="pointer-events-none absolute right-0 top-0 z-20 h-full w-1/2 origin-right bg-white will-change-transform"
+        className="pointer-events-none absolute right-0 top-0 z-20 h-full w-1/2 origin-right bg-white "
       >
         <div className="glow-overlay absolute inset-0 bg-background opacity-0" />
       </div>
@@ -131,7 +144,7 @@ export default function ApertureHero() {
       {/* The Text Layer */}
       <div className="relative z-30 flex h-full w-full items-center justify-center pointer-events-none !p-0">
         <h1 className="font-heading text-[12vw] font-black uppercase tracking-tighter flex items-center justify-center !p-0 m-0">
-          <span className="inline-flex will-change-transform items-center justify-center !p-0 m-0">
+          <span className="inline-flex  items-center justify-center !p-0 m-0">
             <img 
               ref={textRef}
               src={LOGO_WHITE_B64}
@@ -141,15 +154,14 @@ export default function ApertureHero() {
           </span>
           <div
             ref={dotRef}
-            className="relative inline-flex items-center justify-center h-[1.5vw] w-[1.5vw] min-h-[6px] min-w-[6px] mt-[3vw] -ml-[0.5vw] will-change-transform origin-center"
+            className="relative inline-flex items-center justify-center h-[1.5vw] w-[1.5vw] min-h-[6px] min-w-[6px] mt-[3vw] -ml-[0.5vw] origin-center"
           >
             {/* The roaming bug that becomes the aperture transition! */}
             <MechanicalSpider 
-              ref={bugRef} 
-              id="hero" 
+              id="hero-spider"
               isPatrolling={isPatrolling} 
-              originRef={dotRef} 
-              avoidRef={textRef} 
+              initialScale={1}
+              originRef={dotRef}
             />
           </div>
         </h1>

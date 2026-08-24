@@ -22,7 +22,16 @@ export default function SmoothScrolling({ children }: { children: React.ReactNod
   }, [])
 
   return (
-    <ReactLenis root ref={lenisRef} autoRaf={false} options={{ lerp: 0.08 }}>
+    <ReactLenis 
+      root 
+      ref={lenisRef} 
+      autoRaf={false} 
+      options={{ 
+        lerp: 0.05,            // Lower lerp makes the scroll feel slightly heavier/slower to settle
+        wheelMultiplier: 0.6,  // Reduces mouse wheel scroll speed by 40%
+        touchMultiplier: 1.0,  // Reduces mobile swipe scroll distance (default is 2)
+      }}
+    >
       {children}
     </ReactLenis>
   )

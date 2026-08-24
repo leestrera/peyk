@@ -142,19 +142,19 @@ export default function ContactTerminal() {
         {/* The Dark Void Typography Sequence */}
         <div className="dark-void-text absolute top-0 left-0 w-full h-[100vh] lg:h-full lg:inset-0 z-[60] flex flex-col items-center justify-center pointer-events-none px-6">
           <div className="flex flex-col items-start gap-8 md:gap-12 w-full max-w-5xl">
-            <div className="void-word void-word-1 flex flex-col opacity-0 translate-y-[50px]">
-              <span className="font-cursive text-2xl sm:text-4xl md:text-6xl text-white -mb-4 md:-mb-6 ml-2 md:ml-4 drop-shadow-md">from</span>
-              <span className="font-heading text-3xl sm:text-5xl md:text-[6rem] lg:text-[8rem] font-black uppercase tracking-tighter text-white leading-none drop-shadow-xl">Concept</span>
+            <div className="void-word void-word-1 flex flex-col items-start opacity-0 translate-y-[50px]">
+              <span className="font-cursive text-4xl sm:text-5xl md:text-6xl text-white -mb-2 md:-mb-6 ml-2 md:ml-4 drop-shadow-md">from</span>
+              <span className="font-heading text-5xl sm:text-6xl md:text-[6rem] lg:text-[8rem] font-black uppercase tracking-tighter text-white leading-none drop-shadow-xl">Concept</span>
             </div>
             
-            <div className="void-word void-word-2 flex flex-col ml-8 md:ml-24 opacity-0 translate-y-[50px]">
-              <span className="font-cursive text-2xl sm:text-4xl md:text-6xl text-white -mb-4 md:-mb-6 ml-2 md:ml-4 drop-shadow-md">through</span>
-              <span className="font-heading text-3xl sm:text-5xl md:text-[6rem] lg:text-[8rem] font-black uppercase tracking-tighter text-white leading-none drop-shadow-xl">Architecture</span>
+            <div className="void-word void-word-2 flex flex-col items-start ml-8 md:ml-24 opacity-0 translate-y-[50px]">
+              <span className="font-cursive text-4xl sm:text-5xl md:text-6xl text-white -mb-2 md:-mb-6 ml-2 md:ml-4 drop-shadow-md">through</span>
+              <span className="font-heading text-[2.5rem] sm:text-5xl md:text-[6rem] lg:text-[8rem] font-black uppercase tracking-tighter text-white leading-none drop-shadow-xl">Architecture</span>
             </div>
             
-            <div className="void-word void-word-3 flex flex-col ml-16 md:ml-48 opacity-0 translate-y-[50px]">
-              <span className="font-cursive text-2xl sm:text-4xl md:text-6xl text-white -mb-4 md:-mb-6 ml-2 md:ml-4 drop-shadow-md">into</span>
-              <span className="font-heading text-3xl sm:text-5xl md:text-[6rem] lg:text-[8rem] font-black uppercase tracking-tighter text-white leading-none drop-shadow-xl">Legacy</span>
+            <div className="void-word void-word-3 flex flex-col items-start ml-16 md:ml-48 opacity-0 translate-y-[50px]">
+              <span className="font-cursive text-4xl sm:text-5xl md:text-6xl text-white -mb-2 md:-mb-6 ml-2 md:ml-4 drop-shadow-md">into</span>
+              <span className="font-heading text-5xl sm:text-6xl md:text-[6rem] lg:text-[8rem] font-black uppercase tracking-tighter text-white leading-none drop-shadow-xl">Legacy</span>
             </div>
           </div>
         </div>

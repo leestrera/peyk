@@ -1,9 +1,13 @@
+"use client";
+
 import CustomCursor from "@/components/CustomCursor";
 import GlassNavbar from "@/components/GlassNavbar";
 import ApertureHero from "@/components/ApertureHero";
 import Manifesto from "@/components/Manifesto";
-import ShowcaseDeck from "@/components/ShowcaseDeck";
-import CloudTransition from "@/components/CloudTransition";
+import dynamic from "next/dynamic";
+
+const ShowcaseDeck = dynamic(() => import("@/components/ShowcaseDeck"), { ssr: false });
+const CloudTransition = dynamic(() => import("@/components/CloudTransition"), { ssr: false });
 import AgencyServices from "@/components/AgencyServices";
 import PurposeSection from "@/components/PurposeSection";
 import ContactTerminal from "@/components/ContactTerminal";
@@ -14,7 +18,7 @@ import ScrollIndicator from "@/components/ScrollIndicator";
 
 export default function Home() {
   return (
-    <main className="relative w-full bg-background overflow-clip">
+    <main className="relative w-full bg-background">
       <ScrollRestoration />
       <Preloader />
       <ScrollIndicator />
@@ -22,13 +26,13 @@ export default function Home() {
       <GlassNavbar />
       
       <ApertureHero />
-      <Manifesto />
-      <ShowcaseDeck />
+      <div><Manifesto /></div>
+      <div><ShowcaseDeck /></div>
       <CloudTransition />
-      <AgencyServices />
-      <TemplatesShowcase />
-      <PurposeSection />
-      <ContactTerminal />
+      <div><AgencyServices /></div>
+      <div><TemplatesShowcase /></div>
+      <div><PurposeSection /></div>
+      <div><ContactTerminal /></div>
     </main>
   );
 }

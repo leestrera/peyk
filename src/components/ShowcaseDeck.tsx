@@ -49,7 +49,7 @@ export default function ShowcaseDeck() {
     });
 
     return () => {
-      ScrollTrigger.getAll().forEach((t) => t.kill());
+      // gsap.context handles its own cleanup
     };
   }, []);
 

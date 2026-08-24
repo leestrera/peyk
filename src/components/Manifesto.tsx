@@ -10,13 +10,12 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 const CHARS = "!<>-_\\\\/[]{}—=+*^?#________";
 
-function useScrambleText(text: string) {
-  const [displayText, setDisplayText] = useState(text);
-  const [isScrambling, setIsScrambling] = useState(false);
+function useScrambleText(text: string, textRef: React.RefObject<HTMLParagraphElement | null>) {
+  const isScrambling = useRef(false);
 
   const scramble = useCallback(() => {
-    if (isScrambling) return;
-    setIsScrambling(true);
+    if (isScrambling.current) return;
+    isScrambling.current = true;
     
     let frame = 0;
     const queue: { from: string; to: string; start: number; end: number; char?: string }[] = [];
@@ -48,10 +47,12 @@ function useScrambleText(text: string) {
         }
       }
 
-      setDisplayText(output);
+      if (textRef.current) {
+        textRef.current.innerHTML = output;
+      }
 
       if (complete === queue.length) {
-        setIsScrambling(false);
+        isScrambling.current = false;
       } else {
         frame++;
         requestAnimationFrame(update);
@@ -59,15 +60,16 @@ function useScrambleText(text: string) {
     };
 
     update();
-  }, [isScrambling, text]);
+  }, [text, textRef]);
 
-  return { displayText, scramble };
+  return { scramble };
 }
 
 export default function Manifesto() {
   const containerRef = useRef<HTMLElement>(null);
+  const textRef = useRef<HTMLParagraphElement>(null);
   const targetText = "We don't just build for clients. We build for the world.";
-  const { displayText, scramble } = useScrambleText(targetText);
+  const { scramble } = useScrambleText(targetText, textRef);
   const hasTriggered = useRef(false);
 
   useGSAP(() => {
@@ -87,6 +89,9 @@ export default function Manifesto() {
   }, { scope: containerRef, dependencies: [scramble] });
 
   useEffect(() => {
+    // Disable flashlight tracking on mobile/touch devices
+    if (typeof window !== 'undefined' && (window.matchMedia('(hover: none)').matches || window.innerWidth < 768)) return;
+
     const handleMouseMove = (e: MouseEvent) => {
       if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
@@ -120,9 +125,9 @@ export default function Manifesto() {
         }}
       >
 
-        {/* Circuit Traces: Faintly visible globally (1%), highlighted to 100% by the mouse flashlight mask. */}
+        {/* Circuit Traces: Faintly visible globally (1%), highlighted to 100% by the mouse flashlight mask. Hidden on mobile to save GPU */}
         <div 
-          className="absolute inset-0 pointer-events-none z-0 mix-blend-screen opacity-90 transition-opacity duration-300"
+          className="absolute inset-0 pointer-events-none z-0 hidden md:block mix-blend-screen opacity-90 transition-opacity duration-300"
           style={{
             maskImage: "radial-gradient(circle 350px at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(0,0,0,1) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0.01) 100%)",
             WebkitMaskImage: "radial-gradient(circle 350px at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(0,0,0,1) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0.01) 100%)"
@@ -137,8 +142,9 @@ export default function Manifesto() {
           </h2>
           
           <p 
+            ref={textRef}
             className="font-cursive text-3xl sm:text-5xl md:text-7xl text-white leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: displayText === targetText ? targetText : displayText }}
+            dangerouslySetInnerHTML={{ __html: targetText }}
           />
         </div>
       </section>

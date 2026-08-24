@@ -57,6 +57,9 @@ export default function GlassNavbar() {
     const pendulumDamping = 0.94;
     
     lastScrollY.current = window.scrollY;
+    
+    // Disable physics loop entirely on touch devices / mobile to save battery and GPU
+    if (typeof window !== 'undefined' && (window.matchMedia('(hover: none)').matches || window.innerWidth < 768)) return;
 
     const updatePendulum = () => {
       if (!pullStringRef.current) {
@@ -84,11 +87,19 @@ export default function GlassNavbar() {
         pendulumVelocity.current *= -0.5;
       }
 
-      if (!swayLocked.current) {
-        gsap.set(pullStringRef.current, {
-          rotation: pendulumAngle.current * (180 / Math.PI),
-          overwrite: "auto"
-        });
+      // PERFORMANCE OPTIMIZATION: Put physics to sleep when perfectly still 
+      // (prevents 60fps layout thrashing when user is not scrolling)
+      if (Math.abs(scrollDelta) < 0.5 && Math.abs(pendulumVelocity.current) < 0.001 && Math.abs(pendulumAngle.current) < 0.001) {
+        pendulumAngle.current = 0;
+        pendulumVelocity.current = 0;
+        // Optional: snap to 0 once, but avoid doing it every frame
+      } else {
+        if (!swayLocked.current && pullStringRef.current) {
+          gsap.set(pullStringRef.current, {
+            rotation: pendulumAngle.current * (180 / Math.PI),
+            overwrite: "auto"
+          });
+        }
       }
 
       animationFrameId = requestAnimationFrame(updatePendulum);
@@ -133,11 +144,11 @@ export default function GlassNavbar() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
       <nav
-        className={`pointer-events-auto relative flex flex-col md:flex-row items-center justify-between rounded-3xl md:rounded-full px-6 py-4 md:py-3 gap-4 md:gap-0 transition-all duration-700 ease-out will-change-transform 
+        className={`pointer-events-auto relative flex flex-col md:flex-row items-center justify-between rounded-3xl md:rounded-full px-6 py-8 md:py-2 gap-6 md:gap-0 transition-all duration-700 ease-out w-[90vw] md:w-auto mx-auto
           ${!isScrolled 
             ? "-translate-y-[150%] opacity-0" 
             : isMenuOpen 
-              ? "translate-y-6 opacity-100 bg-black/40 backdrop-blur-xl shadow-lg border border-white/10" 
+              ? "translate-y-6 opacity-100 bg-[#09090b]/80 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] border border-white/10" 
               : "-translate-y-[100%] opacity-100"
           }
         `}
@@ -154,45 +165,45 @@ export default function GlassNavbar() {
           </div>
         </div>
 
-        <div className="flex w-full md:w-auto items-center justify-center md:justify-start gap-3">
+        <div className="flex w-full md:w-auto items-center justify-center md:justify-start pb-4 md:pb-0 border-b border-white/5 md:border-none">
           <Image
             src="/assets/logos/text_logo.png"
             alt="Peyk Logo"
             width={120}
             height={40}
-            className="h-6 w-auto object-contain invert"
+            className="h-5 md:h-5 w-auto object-contain invert opacity-90"
             priority
           />
         </div>
 
-        <ul className="md:ml-10 flex flex-col md:flex-row items-center gap-2 p-2 md:p-1 w-full md:w-auto rounded-2xl md:rounded-full bg-white/5 border border-white/5">
-          <li>
+        <ul className="md:ml-12 flex flex-col md:flex-row items-center gap-2 md:gap-1 p-1 w-full md:w-auto">
+          <li className="w-full md:w-auto">
             <a
               href="#hero"
               onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-              className={`block w-full text-center px-6 md:px-4 py-2 md:py-1.5 font-sans text-sm font-medium transition-all duration-300 rounded-xl md:rounded-full ${
-                activeSection === "hero" ? "bg-white/15 text-white shadow-sm" : "text-white/60 hover:text-white hover:bg-white/10"
+              className={`block w-full text-center px-4 md:px-5 py-3 md:py-2 font-mono text-[11px] md:text-[10px] tracking-[0.2em] uppercase font-medium transition-all duration-300 rounded-full ${
+                activeSection === "hero" ? "text-peyk-amber bg-peyk-amber/10 shadow-[0_0_15px_rgba(245,158,11,0.15)]" : "text-white/40 hover:text-peyk-amber hover:bg-peyk-amber/10 hover:shadow-[0_0_15px_rgba(245,158,11,0.15)]"
               }`}
               data-magnetic
             >
               Home
             </a>
           </li>
-          <li>
+          <li className="w-full md:w-auto">
             <a
               href="#"
               onClick={(e) => e.preventDefault()}
-              className={`block w-full text-center px-6 md:px-4 py-2 md:py-1.5 font-sans text-sm font-medium transition-all duration-300 rounded-xl md:rounded-full text-white/60 hover:text-white hover:bg-white/10 cursor-not-allowed`}
+              className={`block w-full text-center px-4 md:px-5 py-3 md:py-2 font-mono text-[11px] md:text-[10px] tracking-[0.2em] uppercase font-medium transition-all duration-300 rounded-full text-white/40 hover:text-peyk-amber hover:bg-peyk-amber/10 hover:shadow-[0_0_15px_rgba(245,158,11,0.15)] cursor-not-allowed`}
               data-magnetic
             >
               About Us
             </a>
           </li>
-          <li>
+          <li className="w-full md:w-auto">
             <a
               href="#"
               onClick={(e) => e.preventDefault()}
-              className={`block w-full text-center px-6 md:px-4 py-2 md:py-1.5 font-sans text-sm font-medium transition-all duration-300 rounded-xl md:rounded-full text-white/60 hover:text-white hover:bg-white/10 cursor-not-allowed`}
+              className={`block w-full text-center px-4 md:px-5 py-3 md:py-2 font-mono text-[11px] md:text-[10px] tracking-[0.2em] uppercase font-medium transition-all duration-300 rounded-full text-white/40 hover:text-peyk-amber hover:bg-peyk-amber/10 hover:shadow-[0_0_15px_rgba(245,158,11,0.15)] cursor-not-allowed`}
               data-magnetic
             >
               Contact Us
@@ -200,9 +211,9 @@ export default function GlassNavbar() {
           </li>
         </ul>
 
-        <div className="md:ml-10 w-full md:w-auto block">
+        <div className="md:ml-12 w-full md:w-auto block pt-2 md:pt-0 border-t border-white/5 md:border-none">
           <button
-            className="w-full md:w-auto rounded-full px-5 py-3 md:py-2 font-sans text-sm font-semibold transition-all hover:scale-105 hover:bg-peyk-silver bg-white text-background"
+            className="w-full md:w-auto rounded-full px-6 py-4 md:py-2.5 font-mono text-[11px] md:text-[10px] tracking-[0.2em] uppercase font-semibold transition-all duration-300 border border-white/10 bg-[#09090b] text-white/70 hover:text-peyk-amber hover:border-peyk-amber/40 hover:shadow-[0_0_20px_rgba(245,158,11,0.15)]"
             data-magnetic
           >
             Connect

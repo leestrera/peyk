@@ -14,10 +14,10 @@ interface MechanicalSpiderProps {
 
 const MechanicalSpider = forwardRef<HTMLDivElement, MechanicalSpiderProps>(
   ({ id, isPatrolling, originRef, avoidRef, avoidRefs, initialScale = 1 }, ref) => {
-    
+
     // Create an internal ref so we always have access, but also forward to parent
     const internalRef = useRef<HTMLDivElement>(null);
-    
+
     // We use a callback ref to handle both the forwarded ref and our internal ref
     const setRefs = (node: HTMLDivElement) => {
       internalRef.current = node;
@@ -31,7 +31,7 @@ const MechanicalSpider = forwardRef<HTMLDivElement, MechanicalSpiderProps>(
     useEffect(() => {
       const bug = internalRef.current;
       const dot = originRef.current;
-      
+
       if (!bug || !dot) return;
 
       let bugTween: gsap.core.Animation | null = null;
@@ -47,7 +47,7 @@ const MechanicalSpider = forwardRef<HTMLDivElement, MechanicalSpiderProps>(
 
         const pxToVw = 100 / window.innerWidth;
         const dotRect = dot.getBoundingClientRect();
-        
+
         // Calculate max safe distance to screen edges (with 3vw padding)
         const maxX = Math.max(0, Math.min((window.innerWidth - dotRect.right) * pxToVw - 3, 30));
         const minX = Math.min(0, Math.max(-(dotRect.left * pxToVw) + 3, -40));
@@ -74,7 +74,7 @@ const MechanicalSpider = forwardRef<HTMLDivElement, MechanicalSpiderProps>(
             minY: (rect.top - dotRect.top) * pxToVw - 3,
             maxY: (rect.bottom - dotRect.top) * pxToVw + 3
           };
-        }).filter(Boolean) as {minX: number, maxX: number, minY: number, maxY: number}[];
+        }).filter(Boolean) as { minX: number, maxX: number, minY: number, maxY: number }[];
 
         // Truncate movement if it hits an avoidance rect
         for (const rect of avoidRects) {
@@ -136,7 +136,7 @@ const MechanicalSpider = forwardRef<HTMLDivElement, MechanicalSpiderProps>(
           gsap.delayedCall(0.1, wander);
           return;
         }
-        
+
         const targetRotation = (Math.atan2(dy, dx) * 180) / Math.PI + 90;
         const speed = 25;
         const duration = distance / speed;
@@ -181,7 +181,7 @@ const MechanicalSpider = forwardRef<HTMLDivElement, MechanicalSpiderProps>(
           line.className = "absolute bg-[#f59e0b] mix-blend-screen pointer-events-none";
           line.style.boxShadow = "0 0 8px rgba(245, 158, 11, 0.8)";
           line.style.opacity = "0.8";
-          
+
           if (isHorizontal) {
             const isRight = targetX > currentX;
             line.style.left = `calc(50% + ${Math.min(currentX, targetX)}vw)`;
@@ -203,6 +203,12 @@ const MechanicalSpider = forwardRef<HTMLDivElement, MechanicalSpiderProps>(
           }
           trailContainer.appendChild(line);
 
+          // Cap trail DOM nodes to prevent GPU layer explosion on mobile
+          const MAX_TRAILS = 8;
+          while (trailContainer.children.length > MAX_TRAILS) {
+            trailContainer.removeChild(trailContainer.children[0]);
+          }
+
           moveTl.to(line, {
             scaleX: isHorizontal ? 1 : undefined,
             scaleY: !isHorizontal ? 1 : undefined,
@@ -222,11 +228,15 @@ const MechanicalSpider = forwardRef<HTMLDivElement, MechanicalSpiderProps>(
         bugTween = moveTl;
       };
 
-      const cleanupTrails = () => {
+      const cleanupTrails = (instant = false) => {
         const trailContainer = document.getElementById(`trail-container-${id}`);
         if (trailContainer) {
           Array.from(trailContainer.children).forEach(line => {
-            gsap.to(line, { opacity: 0, duration: 1, onComplete: () => line.remove() });
+            if (instant) {
+              line.remove();
+            } else {
+              gsap.to(line, { opacity: 0, duration: 1, onComplete: () => line.remove() });
+            }
           });
         }
       };
@@ -235,13 +245,13 @@ const MechanicalSpider = forwardRef<HTMLDivElement, MechanicalSpiderProps>(
         wander();
       } else {
         bug.classList.remove("bug-walking");
-        cleanupTrails();
+        cleanupTrails(true);
       }
 
       return () => {
         if (bugTween) bugTween.kill();
         gsap.killTweensOf(wander);
-        cleanupTrails();
+        cleanupTrails(true);
       };
     }, [isPatrolling, id, originRef, avoidRef]);
 
@@ -256,7 +266,7 @@ const MechanicalSpider = forwardRef<HTMLDivElement, MechanicalSpiderProps>(
             <div className="absolute top-[20%] left-[10%] w-[80%] h-[100%] bg-background rounded-full z-10" />
             {/* Spider Cephalothorax (front) */}
             <div className="absolute -top-[15%] left-[25%] w-[50%] h-[50%] bg-background rounded-full z-10" />
-            
+
             {/* Left Legs */}
             <div className="absolute inset-0 origin-center -rotate-[40deg]">
               <div className="bug-leg leg-l leg-l-1 bg-background top-[20%] -left-[100%] w-[120%] h-[8%]" />
