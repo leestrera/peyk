@@ -107,10 +107,10 @@ export default function ApertureHero() {
         }
       }, 0)
       
-      // 2. The Seamless Handover: Eliminate the crossfade drop by using instant SET commands.
-      // We turn the curtains solid amber right before the dot finishes scaling.
-      // Because the dot is already massive, this happens invisibly behind it.
-      .set(".glow-overlay", { opacity: 1 }, 2.4)
+      // 2. The Seamless Handover: Smoothly crossfade the background to black
+      // As the spider explodes in size, we slowly fade the curtains to black so it blends naturally
+      // without a harsh snap when the spider is deleted.
+      .to(".glow-overlay", { opacity: 1, duration: 1.2, ease: "power2.inOut" }, 1.3)
       // Exactly as the split starts, we delete the physical dot so the curtains can open.
       .set(dot, { opacity: 0 }, 2.5)
 

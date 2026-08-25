@@ -262,37 +262,51 @@ const MechanicalSpider = forwardRef<HTMLDivElement, MechanicalSpiderProps>(
 
         <div ref={setRefs} className={`bug-wrapper bug-wrapper-${id} absolute inset-0 w-full h-full`} style={{ transform: `scale(${initialScale})` }}>
           <div className="bug-wiggle-wrapper absolute inset-0 w-full h-full">
-            {/* Spider Abdomen (rear) */}
-            <div className="absolute top-[20%] left-[10%] w-[80%] h-[100%] bg-background rounded-full z-10" />
-            {/* Spider Cephalothorax (front) */}
-            <div className="absolute -top-[15%] left-[25%] w-[50%] h-[50%] bg-background rounded-full z-10" />
-
-            {/* Left Legs */}
-            <div className="absolute inset-0 origin-center -rotate-[40deg]">
-              <div className="bug-leg leg-l leg-l-1 bg-background top-[20%] -left-[100%] w-[120%] h-[8%]" />
-            </div>
-            <div className="absolute inset-0 origin-center -rotate-[15deg]">
-              <div className="bug-leg leg-l leg-l-2 bg-background top-[40%] -left-[120%] w-[140%] h-[8%]" />
-            </div>
-            <div className="absolute inset-0 origin-center rotate-[10deg]">
-              <div className="bug-leg leg-l leg-l-3 bg-background top-[60%] -left-[120%] w-[140%] h-[8%]" />
-            </div>
-            <div className="absolute inset-0 origin-center rotate-[35deg]">
-              <div className="bug-leg leg-l leg-l-4 bg-background top-[80%] -left-[100%] w-[120%] h-[8%]" />
-            </div>
-
-            {/* Right Legs */}
-            <div className="absolute inset-0 origin-center rotate-[40deg]">
-              <div className="bug-leg leg-r leg-r-1 bg-background top-[20%] -right-[100%] w-[120%] h-[8%]" />
-            </div>
-            <div className="absolute inset-0 origin-center rotate-[15deg]">
-              <div className="bug-leg leg-r leg-r-2 bg-background top-[40%] -right-[120%] w-[140%] h-[8%]" />
-            </div>
-            <div className="absolute inset-0 origin-center -rotate-[10deg]">
-              <div className="bug-leg leg-r leg-r-3 bg-background top-[60%] -right-[120%] w-[140%] h-[8%]" />
-            </div>
-            <div className="absolute inset-0 origin-center -rotate-[35deg]">
-              <div className="bug-leg leg-r leg-r-4 bg-background top-[80%] -right-[100%] w-[120%] h-[8%]" />
+            <div 
+              className="bug-scaler absolute" 
+              style={{
+                width: "15000%",
+                height: "15000%",
+                top: "50%",
+                left: "50%",
+                marginTop: "-7500%",
+                marginLeft: "-7500%",
+                transform: "scale(0.0066666)",
+                willChange: "transform"
+              }}
+            >
+              {/* Spider Abdomen (rear) */}
+              <div className="absolute top-[20%] left-[10%] w-[80%] h-[100%] bg-background rounded-full z-10" />
+              {/* Spider Cephalothorax (front) */}
+              <div className="absolute -top-[15%] left-[25%] w-[50%] h-[50%] bg-background rounded-full z-10" />
+  
+              {/* Left Legs */}
+              <div className="absolute inset-0 origin-center -rotate-[40deg]">
+                <div className="bug-leg leg-l leg-l-1 bg-background top-[20%] -left-[100%] w-[120%] h-[8%]" />
+              </div>
+              <div className="absolute inset-0 origin-center -rotate-[15deg]">
+                <div className="bug-leg leg-l leg-l-2 bg-background top-[40%] -left-[120%] w-[140%] h-[8%]" />
+              </div>
+              <div className="absolute inset-0 origin-center rotate-[10deg]">
+                <div className="bug-leg leg-l leg-l-3 bg-background top-[60%] -left-[120%] w-[140%] h-[8%]" />
+              </div>
+              <div className="absolute inset-0 origin-center rotate-[35deg]">
+                <div className="bug-leg leg-l leg-l-4 bg-background top-[80%] -left-[100%] w-[120%] h-[8%]" />
+              </div>
+  
+              {/* Right Legs */}
+              <div className="absolute inset-0 origin-center rotate-[40deg]">
+                <div className="bug-leg leg-r leg-r-1 bg-background top-[20%] -right-[100%] w-[120%] h-[8%]" />
+              </div>
+              <div className="absolute inset-0 origin-center rotate-[15deg]">
+                <div className="bug-leg leg-r leg-r-2 bg-background top-[40%] -right-[120%] w-[140%] h-[8%]" />
+              </div>
+              <div className="absolute inset-0 origin-center -rotate-[10deg]">
+                <div className="bug-leg leg-r leg-r-3 bg-background top-[60%] -right-[120%] w-[140%] h-[8%]" />
+              </div>
+              <div className="absolute inset-0 origin-center -rotate-[35deg]">
+                <div className="bug-leg leg-r leg-r-4 bg-background top-[80%] -right-[100%] w-[120%] h-[8%]" />
+              </div>
             </div>
           </div>
         </div>
