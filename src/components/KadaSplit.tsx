@@ -364,13 +364,13 @@ export default function KadaSplit() {
         <div ref={phonesSlideWrapperRef} className="absolute inset-0 w-full h-full pointer-events-none z-30 [perspective:1200px] [transform-style:preserve-3d] will-change-transform">
           {/* Phone 1 */}
           <div ref={phone1Ref} className="absolute right-[10%] md:right-[20%] top-[25%] md:top-[28%] h-[45svh] lg:h-[55vh] w-[calc(45svh*2580/5592)] lg:w-[calc(55vh*2580/5592)] z-10 will-change-transform">
-            <img src="/assets/images/kadasplit_slices/Slice 1.png" alt="KadaSplit 1" className="h-full w-full object-contain" />
+            <img src="/assets/images/kadasplit_slices/Slice 1.webp" alt="KadaSplit 1" className="h-full w-full object-contain" />
             <HoneyDrip />
           </div>
           
           {/* Phone 2 (Slice 7) */}
           <div ref={phone2Ref} className="absolute right-[5%] md:right-[10%] top-[20%] md:top-[22%] h-[45svh] lg:h-[55vh] w-[calc(45svh*2580/5592)] lg:w-[calc(55vh*2580/5592)] z-20 will-change-transform">
-            <img src="/assets/images/kadasplit_slices/Slice 7.png" alt="KadaSplit 7" className="h-full w-full object-contain" />
+            <img src="/assets/images/kadasplit_slices/Slice 7.webp" alt="KadaSplit 7" className="h-full w-full object-contain" />
           </div>
         </div>
 
@@ -381,7 +381,7 @@ export default function KadaSplit() {
             
             {/* Slot 1: Ghost 1 (Slice 1) */}
             <div ref={ghost1Ref} className="h-[45svh] lg:h-[55vh] shrink-0 pointer-events-none relative w-[calc(45svh*2580/5592)] lg:w-[calc(55vh*2580/5592)]">
-              <img src="/assets/images/kadasplit_slices/Slice 1.png" className="h-full w-full opacity-0" loading="lazy" decoding="async" />
+              <img src="/assets/images/kadasplit_slices/Slice 1.webp" className="h-full w-full opacity-0" />
             </div>
             
             {/* Slot 2-6: Slices 2-6 */}
@@ -391,14 +391,14 @@ export default function KadaSplit() {
                 ref={(el) => { slicesRef.current[i] = el; }}
                 className="relative h-[45svh] lg:h-[55vh] shrink-0 w-[calc(45svh*2580/5592)] lg:w-[calc(55vh*2580/5592)]"
               >
-                <img src={`/assets/images/kadasplit_slices/Slice ${sliceNum}.png`} alt={`KadaSplit ${sliceNum}`} className="h-full w-full object-contain" loading="lazy" decoding="async" />
+                <img src={`/assets/images/kadasplit_slices/Slice ${sliceNum}.webp`} alt={`KadaSplit ${sliceNum}`} className="h-full w-full object-contain" />
                 {[1, 5, 6, 8, 9, 10].includes(sliceNum) && <HoneyDrip />}
               </div>
             ))}
 
             {/* Slot 7: Ghost 2 (Slice 7) */}
             <div ref={ghost2Ref} className="h-[45svh] lg:h-[55vh] shrink-0 pointer-events-none w-[calc(45svh*2580/5592)] lg:w-[calc(55vh*2580/5592)]">
-              <img src="/assets/images/kadasplit_slices/Slice 7.png" className="h-full w-full opacity-0" loading="lazy" decoding="async" />
+              <img src="/assets/images/kadasplit_slices/Slice 7.webp" className="h-full w-full opacity-0" />
             </div>
 
             {/* Slot 8-10: Slices 8-10 */}
@@ -408,7 +408,7 @@ export default function KadaSplit() {
                 ref={(el) => { slicesRef.current[i + 5] = el; }}
                 className="relative h-[45svh] lg:h-[55vh] shrink-0 w-[calc(45svh*2580/5592)] lg:w-[calc(55vh*2580/5592)]"
               >
-                <img src={`/assets/images/kadasplit_slices/Slice ${sliceNum}.png`} alt={`KadaSplit ${sliceNum}`} className="h-full w-full object-contain" loading="lazy" decoding="async" />
+                <img src={`/assets/images/kadasplit_slices/Slice ${sliceNum}.webp`} alt={`KadaSplit ${sliceNum}`} className="h-full w-full object-contain" />
                 {[1, 5, 6, 8, 9, 10].includes(sliceNum) && <HoneyDrip />}
               </div>
             ))}
@@ -420,7 +420,7 @@ export default function KadaSplit() {
                 ref={(el) => { slicesRef.current[i + 8] = el; }}
                 className="relative h-[45svh] lg:h-[55vh] shrink-0 w-[calc(45svh*2580/5592)] lg:w-[calc(55vh*2580/5592)]"
               >
-                <img src={`/assets/images/kadasplit_slices/Slice ${sliceNum}.png`} alt={`KadaSplit ${sliceNum}`} className="h-full w-full object-contain" loading="lazy" decoding="async" />
+                <img src={`/assets/images/kadasplit_slices/Slice ${sliceNum}.webp`} alt={`KadaSplit ${sliceNum}`} className="h-full w-full object-contain" />
                 {[1, 5, 6, 8, 9, 10].includes(sliceNum) && <HoneyDrip />}
               </div>
             ))}
@@ -432,7 +432,7 @@ export default function KadaSplit() {
                 ref={(el) => { slicesRef.current[i + 18] = el; }}
                 className="relative h-[45svh] lg:h-[55vh] shrink-0 w-[calc(45svh*2580/5592)] lg:w-[calc(55vh*2580/5592)]"
               >
-                <img src={`/assets/images/kadasplit_slices/Slice ${sliceNum}.png`} alt={`KadaSplit ${sliceNum}`} className="h-full w-full object-contain" loading="lazy" decoding="async" />
+                <img src={`/assets/images/kadasplit_slices/Slice ${sliceNum}.webp`} alt={`KadaSplit ${sliceNum}`} className="h-full w-full object-contain" />
                 {[1, 5, 6, 8, 9, 10].includes(sliceNum) && <HoneyDrip />}
               </div>
             ))}
