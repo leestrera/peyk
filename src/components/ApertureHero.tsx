@@ -162,6 +162,7 @@ export default function ApertureHero() {
               isPatrolling={isPatrolling} 
               initialScale={1}
               originRef={dotRef}
+              avoidRef={textRef}
             />
           </div>
         </h1>

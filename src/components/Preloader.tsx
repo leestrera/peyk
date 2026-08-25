@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { useLenis } from 'lenis/react';
 
 // =========================================================================
 // 🎛️ PRELOADER MANUAL ALIGNMENT CONTROLS
@@ -27,6 +28,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
   const [canvasFailed, setCanvasFailed] = useState(false);
   const [showFallbackButton, setShowFallbackButton] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const lenis = useLenis();
 
   // Live adjustment state (active in Freeze Mode)
   const [scaleX, setScaleX] = useState(PRELOADER_SCALE_X);
@@ -46,6 +48,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
       setIsDone(true);
       document.body.classList.remove("is-preloading");
       document.body.style.overflow = "";
+      if (lenis) lenis.start();
       if (onComplete) onComplete();
       window.dispatchEvent(new CustomEvent("preloaderComplete"));
     }, 800);
@@ -65,6 +68,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
         setIsDone(true);
         document.body.classList.remove("is-preloading");
         document.body.style.overflow = "";
+        if (lenis) lenis.start();
         if (onComplete) onComplete();
         window.dispatchEvent(new CustomEvent("preloaderComplete"));
       }, 800); // Matches CSS transition duration
@@ -74,7 +78,8 @@ export default function Preloader({ onComplete }: PreloaderProps) {
   useEffect(() => {
     const checkAutoplay = setTimeout(() => {
       if (videoRef.current && videoRef.current.currentTime === 0) {
-        setShowFallbackButton(true);
+        // Autoplay failed, skip preloader immediately so the user isn't stuck
+        if (!isExiting) handleFinish();
       }
     }, 800);
     const fallbackComplete = setTimeout(() => {
@@ -209,6 +214,12 @@ export default function Preloader({ onComplete }: PreloaderProps) {
     };
   }, []);
 
+  useEffect(() => {
+    if (lenis && !FREEZE_COMPARISON_MODE && !isExiting && !isDone) {
+      lenis.stop();
+    }
+  }, [lenis, isExiting, isDone]);
+
   const handleTimeUpdate = () => {
     if (!videoRef.current || FREEZE_COMPARISON_MODE) return;
     if (videoRef.current.currentTime >= 3.9) {
@@ -217,6 +228,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
         setIsDone(true);
         document.body.classList.remove("is-preloading");
         document.body.style.overflow = "";
+        if (lenis) lenis.start();
         if (onComplete) onComplete();
         window.dispatchEvent(new CustomEvent("preloaderComplete"));
       }, 800);
@@ -264,17 +276,6 @@ export default function Preloader({ onComplete }: PreloaderProps) {
             ref={canvasRef} 
             className="w-full h-auto max-h-[75vh] object-contain block !p-0 !m-0"
           />
-        )}
-        
-        {/* iOS Safari Autoplay Fallback Button */}
-        {showFallbackButton && (
-          <button
-            onClick={forceStart}
-            className="absolute z-[200] px-8 py-4 bg-black text-white text-sm font-bold uppercase tracking-widest border border-white/20 hover:bg-white hover:text-black transition-colors shadow-[0_0_40px_rgba(255,255,255,0.2)]"
-            style={{ bottom: "15vh" }}
-          >
-            Enter Studio
-          </button>
         )}
       </div>
 
