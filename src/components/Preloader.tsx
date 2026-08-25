@@ -252,6 +252,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
           src="/assets/videos/Motion_graphics_text_animation_1080p_202608211315.mp4"
           muted
           playsInline
+          preload="auto"
           autoPlay={!FREEZE_COMPARISON_MODE}
           onTimeUpdate={handleTimeUpdate}
           className={`w-full h-auto max-h-[75vh] object-contain block !p-0 !m-0 ${canvasFailed ? "opacity-100" : "absolute opacity-0 w-px h-px pointer-events-none"}`}

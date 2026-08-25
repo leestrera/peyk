@@ -42,6 +42,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${spaceGrotesk.variable} ${plusJakarta.variable} ${jetbrains.variable} ${playfair.variable} ${alexBrush.variable}`}>
+      <head>
+        <link rel="preload" href="/assets/videos/Motion_graphics_text_animation_1080p_202608211315.mp4" as="video" type="video/mp4" fetchPriority="high" />
+      </head>
       <body className="antialiased font-sans bg-background text-foreground min-h-screen">
         <SmoothScrolling>
           {children}
