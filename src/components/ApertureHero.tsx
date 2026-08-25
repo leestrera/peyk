@@ -47,6 +47,7 @@ export default function ApertureHero() {
         scrub: 1,
         pin: true,
         anticipatePin: 1,
+        refreshPriority: 1,
         onUpdate: (self) => {
           // Capture the dot's initial rect the first time if needed
           if (!initialRect) {

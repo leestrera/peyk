@@ -11,6 +11,8 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 export default function ContactTerminal() {
   const [isPatrolling, setIsPatrolling] = useState(false);
+  const [resetTrigger, setResetTrigger] = useState(0);
+  const hasResetRef = useRef(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const dotRef = useRef<HTMLSpanElement>(null);
@@ -44,6 +46,17 @@ export default function ContactTerminal() {
             onUpdate: (self) => {
               if (self.progress >= 0.99) setIsPatrolling(true);
               else setIsPatrolling(false);
+
+              // Reset spider position if the user scrolls completely out of the sequence
+              if (self.progress <= 0 && !hasResetRef.current) {
+                setResetTrigger(Date.now());
+                if (bugRef.current) {
+                  gsap.set(bugRef.current, { x: "0vw", y: "0vw", rotation: 0 });
+                }
+                hasResetRef.current = true;
+              } else if (self.progress > 0) {
+                hasResetRef.current = false;
+              }
             },
           }
         });
@@ -93,6 +106,17 @@ export default function ContactTerminal() {
               setIsPatrolling(true);
             } else {
               setIsPatrolling(false);
+            }
+
+            // Reset spider position if the user scrolls completely out of the sequence
+            if (self.progress <= 0 && !hasResetRef.current) {
+              setResetTrigger(Date.now());
+              if (bugRef.current) {
+                gsap.set(bugRef.current, { x: "0vw", y: "0vw", rotation: 0 });
+              }
+              hasResetRef.current = true;
+            } else if (self.progress > 0) {
+              hasResetRef.current = false;
             }
           },
           invalidateOnRefresh: true,
@@ -180,6 +204,7 @@ export default function ContactTerminal() {
                   className="inline-block h-[12px] w-[12px] md:h-[20px] md:w-[20px] origin-center ml-2 mb-[10px] md:mb-[16px] relative z-[45]" 
                 >
                   <MechanicalSpider 
+                    resetTrigger={resetTrigger}
                     ref={bugRef}
                     id="contact" 
                     isPatrolling={isPatrolling} 

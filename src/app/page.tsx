@@ -24,7 +24,7 @@ export default function Home() {
       <ScrollIndicator />
       <CustomCursor />
       <GlassNavbar />
-      
+
       <ApertureHero />
       <div><Manifesto /></div>
       <div><ShowcaseDeck /></div>

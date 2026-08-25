@@ -34,7 +34,7 @@ export default function KadaSplit() {
   const phone1Ref = useRef<HTMLDivElement>(null);
   const phone2Ref = useRef<HTMLDivElement>(null);
   const phonesSlideWrapperRef = useRef<HTMLDivElement>(null);
-  
+
   const marqueeRef = useRef<HTMLDivElement>(null);
   const ghost1Ref = useRef<HTMLDivElement>(null);
   const ghost2Ref = useRef<HTMLDivElement>(null);
@@ -80,17 +80,17 @@ export default function KadaSplit() {
 
         const dropX1 = g1.left - p1.left;
         const dropY1 = g1.top - p1.top;
-        
+
         const dropX2 = g2.left - p2.left;
         const dropY2 = g2.top - p2.top;
 
         // 3. Initial States
         gsap.set(kadaRef.current, { x: "-50vw", opacity: 0 });
         gsap.set(splitRef.current, { x: "50vw", opacity: 0 });
-        
-        gsap.set(phone1Ref.current, { x: 0, y: 0, z: -50, opacity: 0.7, rotationY: 0 }); 
-        gsap.set(phone2Ref.current, { x: 0, y: 0, z: 0, opacity: 1, rotationY: 0 }); 
-        
+
+        gsap.set(phone1Ref.current, { x: 0, y: 0, z: -50, opacity: 0.7, rotationY: 0 });
+        gsap.set(phone2Ref.current, { x: 0, y: 0, z: 0, opacity: 1, rotationY: 0 });
+
         gsap.set(slicesRef.current, { opacity: 0 });
         gsap.set(marqueeWrapperRef.current, { y: "150vh" }); // Hide Marquee way below screen!
 
@@ -98,8 +98,8 @@ export default function KadaSplit() {
           scrollTrigger: {
             trigger: containerRef.current,
             start: "top top",
-            end: () => `+=${window.innerHeight * 3}`, 
-            scrub: 1.5, 
+            end: () => `+=${window.innerHeight * 3}`,
+            scrub: 1.5,
           },
         });
 
@@ -141,7 +141,7 @@ export default function KadaSplit() {
         // Create highly optimized setter functions for X and Y
         const blockXSetters = blockMouseElements.map((el: any) => gsap.quickTo(el, "x", { duration: 1, ease: "power2.out" }));
         const blockYSetters = blockMouseElements.map((el: any) => gsap.quickTo(el, "y", { duration: 1, ease: "power2.out" }));
-        
+
         const glassXSetters = glassMouseElements.map((el: any) => gsap.quickTo(el, "x", { duration: 1.5, ease: "power2.out" }));
         const glassYSetters = glassMouseElements.map((el: any) => gsap.quickTo(el, "y", { duration: 1.5, ease: "power2.out" }));
 
@@ -149,7 +149,7 @@ export default function KadaSplit() {
         const calculateRepel = (clientX: number, clientY: number, leftStr: string, topStr: string, widthStr: string, heightStr: string, scrollWrapper: Element) => {
           const vw = window.innerWidth;
           const vh = window.innerHeight;
-          
+
           const leftPx = (parseFloat(leftStr) / 100) * vw;
           const topPx = (parseFloat(topStr) / 100) * vh;
           // Extract purely numeric value assuming vw
@@ -215,7 +215,7 @@ export default function KadaSplit() {
 
         // 4. Setup: "KADA" slides in
         tl.to(kadaRef.current, { x: 0, opacity: 1, duration: 2, ease: "power2.out" }, 0);
-        
+
         // 5. Tension: Phones drift apart in 3D space
         tl.to(phone1Ref.current, { x: "-8vw", y: "-2vh", rotationY: -15, z: -80, opacity: 0.9, duration: 3, ease: "none" }, 1);
         tl.to(phone2Ref.current, { x: "8vw", y: "2vh", rotationY: 15, z: 20, duration: 3, ease: "none" }, 1);
@@ -234,13 +234,13 @@ export default function KadaSplit() {
 
         // Text wrapper flies UP and EXITS the screen completely (simulating scroll up)
         tl.to(textWrapperRef.current, { y: "-150vh", duration: 3, ease: "power3.inOut" }, "explode");
-        
+
         // Marquee wrapper rises UP from bottom to perfectly center on screen
         tl.to(marqueeWrapperRef.current, { y: "0vh", duration: 3, ease: "power3.inOut" }, "explode");
-        
+
         // Other slices materialize alongside them (staggered wave)
         tl.to(slicesRef.current, { opacity: 1, duration: 1.5, stagger: 0.05, ease: "power1.inOut" }, "explode+=1");
-        
+
         // 8. Massive Horizontal Slide (Increased to -250vw for longer continuous scroll)
         tl.addLabel("slide", "explode+=2");
         tl.to(marqueeRef.current, { x: "-250vw", duration: 5, ease: "none" }, "slide");
@@ -254,20 +254,20 @@ export default function KadaSplit() {
 
   return (
     <div ref={containerRef} className="relative h-[530vh] w-full bg-[#050505] pt-[30vh]">
-      
+
       {/* Shared SVG filter for HoneyDrip (Defined once for performance) */}
       <svg className="hidden">
         <filter id="gooey-honey">
           <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur" />
-          <feColorMatrix 
-            in="blur" 
-            mode="matrix" 
+          <feColorMatrix
+            in="blur"
+            mode="matrix"
             values="
               1 0 0 0 0  
               0 1 0 0 0  
               0 0 1 0 0  
-              0 0 0 18 -7" 
-            result="goo" 
+              0 0 0 18 -7"
+            result="goo"
           />
           <feBlend in="SourceGraphic" in2="goo" />
         </filter>
@@ -279,9 +279,9 @@ export default function KadaSplit() {
       </div>
 
       <div className="sticky top-0 h-screen w-full overflow-hidden">
-        
+
         {/* TRUE CSS 3D SCENE BACKGROUND */}
-        <div 
+        <div
           className="absolute inset-0 w-full h-full pointer-events-none z-0 overflow-hidden [perspective:1200px]"
           style={{
             maskImage: "linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)",
@@ -290,10 +290,10 @@ export default function KadaSplit() {
         >
           {/* 3D Scene Wrapper */}
           <div className="absolute inset-0 w-full h-full [transform-style:preserve-3d]">
-            
+
             {/* Render True CSS 3D Cubes */}
             {BLOCKS.map((block, i) => (
-              <div 
+              <div
                 key={`block-${i}`}
                 className="bg-block-scroll absolute z-10  [transform-style:preserve-3d]"
                 style={{
@@ -304,7 +304,7 @@ export default function KadaSplit() {
                   "--h": block.size,
                 }}
               >
-                <div 
+                <div
                   className="bg-block-mouse w-full h-full  [transform-style:preserve-3d]"
                   style={{
                     width: block.size,
@@ -319,7 +319,7 @@ export default function KadaSplit() {
 
             {/* Render Frosted Glass Panes */}
             {GLASS_PANES.map((glass, i) => (
-              <div 
+              <div
                 key={`glass-${i}`}
                 className="bg-glass-scroll absolute z-20 hidden md:block"
                 style={{
@@ -343,7 +343,7 @@ export default function KadaSplit() {
               </div>
             ))}
           </div>
-          
+
           {/* Subtle vignette to preserve center text readability */}
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_30%,rgba(5,5,5,0.9)_100%)] pointer-events-none z-30" />
         </div>
@@ -367,7 +367,7 @@ export default function KadaSplit() {
             <img src="/assets/images/kadasplit_slices/Slice 1.webp" alt="KadaSplit 1" className="h-full w-full object-contain" />
             <HoneyDrip />
           </div>
-          
+
           {/* Phone 2 (Slice 7) */}
           <div ref={phone2Ref} className="absolute right-[5%] md:right-[10%] top-[20%] md:top-[22%] h-[45svh] lg:h-[55vh] w-[calc(45svh*2580/5592)] lg:w-[calc(55vh*2580/5592)] z-20 will-change-transform">
             <img src="/assets/images/kadasplit_slices/Slice 7.webp" alt="KadaSplit 7" className="h-full w-full object-contain" />
@@ -378,16 +378,16 @@ export default function KadaSplit() {
         {/* Placed at its final destination on mount so getBoundingClientRect perfectly measures the slots. */}
         <div ref={marqueeWrapperRef} className="absolute top-1/2 -translate-y-1/2 left-0 w-full z-10 flex items-center pl-8 md:pl-24 will-change-transform">
           <div ref={marqueeRef} className="flex gap-0 [perspective:1200px] will-change-transform">
-            
+
             {/* Slot 1: Ghost 1 (Slice 1) */}
             <div ref={ghost1Ref} className="h-[45svh] lg:h-[55vh] shrink-0 pointer-events-none relative w-[calc(45svh*2580/5592)] lg:w-[calc(55vh*2580/5592)]">
               <img src="/assets/images/kadasplit_slices/Slice 1.webp" className="h-full w-full opacity-0" />
             </div>
-            
+
             {/* Slot 2-6: Slices 2-6 */}
             {[2, 3, 4, 5, 6].map((sliceNum, i) => (
-              <div 
-                key={sliceNum} 
+              <div
+                key={sliceNum}
                 ref={(el) => { slicesRef.current[i] = el; }}
                 className="relative h-[45svh] lg:h-[55vh] shrink-0 w-[calc(45svh*2580/5592)] lg:w-[calc(55vh*2580/5592)]"
               >
@@ -403,8 +403,8 @@ export default function KadaSplit() {
 
             {/* Slot 8-10: Slices 8-10 */}
             {[8, 9, 10].map((sliceNum, i) => (
-              <div 
-                key={sliceNum} 
+              <div
+                key={sliceNum}
                 ref={(el) => { slicesRef.current[i + 5] = el; }}
                 className="relative h-[45svh] lg:h-[55vh] shrink-0 w-[calc(45svh*2580/5592)] lg:w-[calc(55vh*2580/5592)]"
               >
@@ -415,8 +415,8 @@ export default function KadaSplit() {
 
             {/* DUPLICATE SET 1 FOR CONTINUOUS SCROLL */}
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((sliceNum, i) => (
-              <div 
-                key={`dup1-${sliceNum}`} 
+              <div
+                key={`dup1-${sliceNum}`}
                 ref={(el) => { slicesRef.current[i + 8] = el; }}
                 className="relative h-[45svh] lg:h-[55vh] shrink-0 w-[calc(45svh*2580/5592)] lg:w-[calc(55vh*2580/5592)]"
               >
@@ -427,8 +427,8 @@ export default function KadaSplit() {
 
             {/* DUPLICATE SET 2 FOR CONTINUOUS SCROLL */}
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((sliceNum, i) => (
-              <div 
-                key={`dup2-${sliceNum}`} 
+              <div
+                key={`dup2-${sliceNum}`}
                 ref={(el) => { slicesRef.current[i + 18] = el; }}
                 className="relative h-[45svh] lg:h-[55vh] shrink-0 w-[calc(45svh*2580/5592)] lg:w-[calc(55vh*2580/5592)]"
               >
@@ -436,7 +436,7 @@ export default function KadaSplit() {
                 {[1, 5, 6, 8, 9, 10].includes(sliceNum) && <HoneyDrip />}
               </div>
             ))}
-            
+
           </div>
         </div>
 

@@ -55,20 +55,20 @@ export default function HoneyDrip() {
       {/* The dripping container with the filter applied (hardware accelerated) */}
       <div
         className="w-full h-full relative gooey-filter"
-        style={{ 
+        style={{
           transform: "translateZ(0)"
         }}
       >
-      {/* Base thick honey line at the cut edge */}
-      <div className="absolute top-0 left-[2%] w-[96%] h-3 bg-[#f59e0b]" />
+        {/* Base thick honey line at the cut edge */}
+        <div className="absolute top-0 left-[2%] w-[96%] h-3 bg-[#f59e0b]" />
 
-      {/* Animated droplets */}
-      <div className="animate-honey-drip absolute top-[2px] left-[15%] w-4 h-4 rounded-full bg-[#f59e0b]" style={{ "--delay": "0s", "--duration": "3s" } as React.CSSProperties} />
-      <div className="animate-honey-drip absolute top-[2px] left-[40%] w-6 h-6 rounded-full bg-[#f59e0b]" style={{ "--delay": "1.2s", "--duration": "4s" } as React.CSSProperties} />
-      <div className="animate-honey-drip absolute top-[2px] left-[65%] w-3 h-3 rounded-full bg-[#f59e0b]" style={{ "--delay": "0.5s", "--duration": "2.5s" } as React.CSSProperties} />
-      <div className="animate-honey-drip absolute top-[2px] left-[85%] w-5 h-5 rounded-full bg-[#f59e0b]" style={{ "--delay": "2.1s", "--duration": "3.5s" } as React.CSSProperties} />
-      <div className="animate-honey-drip absolute top-[2px] left-[25%] w-3 h-3 rounded-full bg-[#f59e0b]" style={{ "--delay": "3.3s", "--duration": "2.8s" } as React.CSSProperties} />
-    </div>
+        {/* Animated droplets */}
+        <div className="animate-honey-drip absolute top-[2px] left-[15%] w-4 h-4 rounded-full bg-[#f59e0b]" style={{ "--delay": "0s", "--duration": "3s" } as React.CSSProperties} />
+        <div className="animate-honey-drip absolute top-[2px] left-[40%] w-6 h-6 rounded-full bg-[#f59e0b]" style={{ "--delay": "1.2s", "--duration": "4s" } as React.CSSProperties} />
+        <div className="animate-honey-drip absolute top-[2px] left-[65%] w-3 h-3 rounded-full bg-[#f59e0b]" style={{ "--delay": "0.5s", "--duration": "2.5s" } as React.CSSProperties} />
+        <div className="animate-honey-drip absolute top-[2px] left-[85%] w-5 h-5 rounded-full bg-[#f59e0b]" style={{ "--delay": "2.1s", "--duration": "3.5s" } as React.CSSProperties} />
+        <div className="animate-honey-drip absolute top-[2px] left-[25%] w-3 h-3 rounded-full bg-[#f59e0b]" style={{ "--delay": "3.3s", "--duration": "2.8s" } as React.CSSProperties} />
+      </div>
     </div >
   );
 }

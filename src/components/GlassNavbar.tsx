@@ -35,7 +35,7 @@ export default function GlassNavbar() {
           }
         });
       },
-      { rootMargin: "-40% 0px -40% 0px" } // Trigger when section is in the middle of the screen
+      { rootMargin: "-40% 0px -40% 0px" }
     );
 
     const sections = ["purpose", "showcase", "contact"];
@@ -87,12 +87,9 @@ export default function GlassNavbar() {
         pendulumVelocity.current *= -0.5;
       }
 
-      // PERFORMANCE OPTIMIZATION: Put physics to sleep when perfectly still 
-      // (prevents 60fps layout thrashing when user is not scrolling)
       if (Math.abs(scrollDelta) < 0.5 && Math.abs(pendulumVelocity.current) < 0.001 && Math.abs(pendulumAngle.current) < 0.001) {
         pendulumAngle.current = 0;
         pendulumVelocity.current = 0;
-        // Optional: snap to 0 once, but avoid doing it every frame
       } else {
         if (!swayLocked.current && pullStringRef.current) {
           gsap.set(pullStringRef.current, {
@@ -144,19 +141,19 @@ export default function GlassNavbar() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
       <nav
-        className={`pointer-events-auto relative flex flex-col md:flex-row items-center justify-between rounded-3xl md:rounded-full px-6 py-8 md:py-2 gap-6 md:gap-0 transition-all duration-700 ease-out w-[90vw] md:w-auto mx-auto
+        className={`pointer-events-auto relative flex flex-col md:flex-row items-center p-1.5 transition-all duration-700 ease-out w-[90vw] md:w-auto mx-auto
           ${!isScrolled 
             ? "-translate-y-[150%] opacity-0" 
             : isMenuOpen 
-              ? "translate-y-6 opacity-100 bg-[#09090b]/80 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] border border-white/10" 
-              : "-translate-y-[100%] opacity-100"
+              ? "translate-y-6 opacity-100 bg-[#09090b]/70 backdrop-blur-2xl rounded-3xl md:rounded-full border border-white/[0.08] shadow-[0_0_0_1px_rgba(0,0,0,0.3),0_8px_32px_rgba(0,0,0,0.4)]" 
+              : "-translate-y-[100%] opacity-100 bg-[#09090b]/70 backdrop-blur-2xl rounded-3xl md:rounded-full border border-white/[0.08]"
           }
         `}
       >
         
         {/* === THE ROPE (Hangs off the bottom of the navbar) === */}
         <div 
-          className={`absolute top-[100%] right-6 md:right-12 transition-opacity duration-500 ease-in-out ${isScrolled ? "opacity-100" : "opacity-0"}`}
+          className={`absolute top-[100%] right-8 md:right-16 transition-opacity duration-500 ease-in-out ${isScrolled ? "opacity-100" : "opacity-0"}`}
         >
           <div ref={pullStringRef} className="nav-pull-string" onClick={handleRopeClick}>
             <div ref={threadRef} className="lanyard-thread"></div>
@@ -165,24 +162,26 @@ export default function GlassNavbar() {
           </div>
         </div>
 
-        <div className="flex w-full md:w-auto items-center justify-center md:justify-start pb-4 md:pb-0 border-b border-white/5 md:border-none">
+        {/* Logo Section */}
+        <div className="flex items-center pl-4 pr-6 py-3 md:py-0 md:h-10 border-b md:border-b-0 md:border-r border-white/10 w-full md:w-auto justify-center md:justify-start">
           <Image
             src="/assets/logos/text_logo.png"
             alt="Peyk Logo"
-            width={120}
-            height={40}
-            className="h-5 md:h-5 w-auto object-contain invert opacity-90"
+            width={80}
+            height={20}
+            className="h-4 md:h-4 w-auto object-contain invert opacity-90"
             priority
           />
         </div>
 
-        <ul className="md:ml-12 flex flex-col md:flex-row items-center gap-2 md:gap-1 p-1 w-full md:w-auto">
+        {/* Links Section */}
+        <ul className="flex flex-col md:flex-row items-center gap-1 px-2 md:px-6 py-4 md:py-0 w-full md:w-auto">
           <li className="w-full md:w-auto">
             <a
               href="#hero"
               onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-              className={`block w-full text-center px-4 md:px-5 py-3 md:py-2 font-mono text-[11px] md:text-[10px] tracking-[0.2em] uppercase font-medium transition-all duration-300 rounded-full ${
-                activeSection === "hero" ? "text-peyk-amber bg-peyk-amber/10 shadow-[0_0_15px_rgba(245,158,11,0.15)]" : "text-white/40 hover:text-peyk-amber hover:bg-peyk-amber/10 hover:shadow-[0_0_15px_rgba(245,158,11,0.15)]"
+              className={`block w-full text-center px-4 py-2 font-mono text-[10px] tracking-[0.2em] uppercase font-medium transition-all duration-300 rounded-full ${
+                activeSection === "hero" ? "text-white bg-white/10" : "text-white/40 hover:text-white"
               }`}
               data-magnetic
             >
@@ -193,7 +192,7 @@ export default function GlassNavbar() {
             <a
               href="#"
               onClick={(e) => e.preventDefault()}
-              className={`block w-full text-center px-4 md:px-5 py-3 md:py-2 font-mono text-[11px] md:text-[10px] tracking-[0.2em] uppercase font-medium transition-all duration-300 rounded-full text-white/40 hover:text-peyk-amber hover:bg-peyk-amber/10 hover:shadow-[0_0_15px_rgba(245,158,11,0.15)] cursor-not-allowed`}
+              className={`block w-full text-center px-4 py-2 font-mono text-[10px] tracking-[0.2em] uppercase font-medium transition-all duration-300 rounded-full text-white/40 hover:text-white cursor-not-allowed`}
               data-magnetic
             >
               About Us
@@ -203,7 +202,7 @@ export default function GlassNavbar() {
             <a
               href="#"
               onClick={(e) => e.preventDefault()}
-              className={`block w-full text-center px-4 md:px-5 py-3 md:py-2 font-mono text-[11px] md:text-[10px] tracking-[0.2em] uppercase font-medium transition-all duration-300 rounded-full text-white/40 hover:text-peyk-amber hover:bg-peyk-amber/10 hover:shadow-[0_0_15px_rgba(245,158,11,0.15)] cursor-not-allowed`}
+              className={`block w-full text-center px-4 py-2 font-mono text-[10px] tracking-[0.2em] uppercase font-medium transition-all duration-300 rounded-full text-white/40 hover:text-white cursor-not-allowed`}
               data-magnetic
             >
               Contact Us
@@ -211,9 +210,10 @@ export default function GlassNavbar() {
           </li>
         </ul>
 
-        <div className="md:ml-12 w-full md:w-auto block pt-2 md:pt-0 border-t border-white/5 md:border-none">
+        {/* Action Button Section */}
+        <div className="pl-2 pr-1 pb-1.5 md:pb-0 w-full md:w-auto block border-t md:border-t-0 border-white/10 pt-3 md:pt-0">
           <button
-            className="w-full md:w-auto rounded-full px-6 py-4 md:py-2.5 font-mono text-[11px] md:text-[10px] tracking-[0.2em] uppercase font-semibold transition-all duration-300 border border-white/10 bg-[#09090b] text-white/70 hover:text-peyk-amber hover:border-peyk-amber/40 hover:shadow-[0_0_20px_rgba(245,158,11,0.15)]"
+            className="w-full md:w-auto rounded-full px-6 py-3 md:py-2.5 font-mono text-[10px] tracking-[0.25em] uppercase font-bold transition-transform duration-300 bg-white text-black hover:scale-105 active:scale-95"
             data-magnetic
           >
             Connect
