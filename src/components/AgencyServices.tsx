@@ -79,7 +79,7 @@ export default function AgencyServices() {
 
     const frameCount = 240;
     const currentFrame = (index: number) => 
-      `/assets/frames/agency/${String(index + 1).padStart(4, "0")}.jpg`;
+      `/assets/frames/agency/${String(index + 1).padStart(4, "0")}.webp`;
 
     // Deferred Preload: Don't choke initial page load!
     const imageSeq = { frame: 0 };
@@ -101,7 +101,12 @@ export default function AgencyServices() {
         for (let i = 0; i < frameCount; i++) {
           if (i === 0) continue; // Already loaded
           const img = new Image();
-          img.onload = render; // Force render if the scroll timeline is already scrubbed to this frame!
+          img.onload = () => {
+            // Only force render if this specific frame is the one currently needed (prevents 240x render spam)
+            if (Math.round(imageSeq.frame) === i) {
+              render();
+            }
+          };
           img.src = currentFrame(i);
           imagesRef.current[i] = img;
         }
@@ -240,15 +245,13 @@ export default function AgencyServices() {
       <div className="pin-target relative top-0 left-0 w-full h-screen overflow-hidden z-0">
         
         {/* Unified masked container for the video and vignette */}
-        <div 
-          className="absolute inset-0 w-full h-full pointer-events-none z-0"
-          style={{
-            maskImage: "linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)",
-            WebkitMaskImage: "linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)"
-          }}
-        >
+        <div className="absolute inset-0 w-full h-full pointer-events-none z-0">
           {/* Canvas Background */}
           <canvas ref={canvasRef} className="absolute inset-0 w-full h-full object-cover" />
+          
+          {/* PERFORMANCE: Replace expensive CSS mask-image with simple gradient overlays */}
+          <div className="absolute top-0 left-0 w-full h-[15%] bg-gradient-to-b from-background to-transparent" />
+          <div className="absolute bottom-0 left-0 w-full h-[15%] bg-gradient-to-t from-background to-transparent" />
           
           {/* Extremely subtle vignette to preserve text readability without darkening the center */}
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_30%,rgba(0,0,0,0.5)_100%)]" />
@@ -261,7 +264,7 @@ export default function AgencyServices() {
             className="agency-card absolute inset-0 w-full h-full flex items-center justify-center px-4 pointer-events-none z-20"
           >
             <div 
-              className="card-content pointer-events-auto w-[75vw] max-w-[320px] aspect-square backdrop-blur-lg bg-black/30 border border-white/10 rounded-none p-6 md:p-8 flex flex-col items-center opacity-0 scale-50"
+              className="card-content pointer-events-auto w-[75vw] max-w-[320px] aspect-square bg-[#09090b]/80 md:backdrop-blur-lg md:bg-black/30 border border-white/10 rounded-none p-6 md:p-8 flex flex-col items-center opacity-0 scale-50"
             >
               
               {/* Static Identifier */}
