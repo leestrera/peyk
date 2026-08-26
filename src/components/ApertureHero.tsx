@@ -122,8 +122,8 @@ export default function ApertureHero() {
   }, { scope: containerRef });
 
   return (
-    <div className="relative w-full z-20">
-      <section ref={containerRef} className="relative h-screen w-full overflow-hidden bg-transparent text-black">
+    <div className="relative w-full z-20 pointer-events-none">
+      <section ref={containerRef} className="relative h-screen w-full overflow-hidden bg-transparent text-black touch-pan-y">
         
         {/* 
         The Split Curtains 
