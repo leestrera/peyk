@@ -283,14 +283,13 @@ const MechanicalSpider = forwardRef<HTMLDivElement, MechanicalSpiderProps>(
             <div
               className="bug-scaler absolute"
               style={{
-                width: "15000%",
-                height: "15000%",
+                width: "1000%",
+                height: "1000%",
                 top: "50%",
                 left: "50%",
-                marginTop: "-7500%",
-                marginLeft: "-7500%",
-                transform: "scale(0.0066666)",
-                willChange: "transform"
+                marginTop: "-500%",
+                marginLeft: "-500%",
+                transform: "scale(0.1)"
               }}
             >
               {/* Spider Abdomen (rear) */}
