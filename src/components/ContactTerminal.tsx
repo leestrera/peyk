@@ -75,7 +75,7 @@ export default function ContactTerminal() {
             0.7
           )
           .fromTo(bugRef.current,
-            { scale: 400 },
+            { scale: 150 },
             { scale: 1, duration: 0.3, ease: "power2.inOut", force3D: false },
             0.7
           )
@@ -138,7 +138,7 @@ export default function ContactTerminal() {
           1.7
         )
         .fromTo(bugRef.current,
-          { scale: 400 },
+          { scale: 150 },
           { scale: 1, duration: 0.8, ease: "power2.inOut", force3D: false },
           1.7
         )
