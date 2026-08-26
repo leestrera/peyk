@@ -29,6 +29,11 @@ export default function Preloader({ onComplete }: PreloaderProps) {
   const [showFallbackButton, setShowFallbackButton] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const lenis = useLenis();
+  const lenisRef = useRef(lenis);
+  
+  useEffect(() => {
+    lenisRef.current = lenis;
+  }, [lenis]);
 
   // Live adjustment state (active in Freeze Mode)
   const [scaleX, setScaleX] = useState(PRELOADER_SCALE_X);
@@ -48,7 +53,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
       setIsDone(true);
       document.body.classList.remove("is-preloading");
       document.body.style.overflow = "";
-      if (lenis) lenis.start();
+      if (lenisRef.current) lenisRef.current.start();
       if (onComplete) onComplete();
       window.dispatchEvent(new CustomEvent("preloaderComplete"));
     }, 800);
@@ -68,7 +73,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
         setIsDone(true);
         document.body.classList.remove("is-preloading");
         document.body.style.overflow = "";
-        if (lenis) lenis.start();
+        if (lenisRef.current) lenisRef.current.start();
         if (onComplete) onComplete();
         window.dispatchEvent(new CustomEvent("preloaderComplete"));
       }, 800); // Matches CSS transition duration
@@ -228,7 +233,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
         setIsDone(true);
         document.body.classList.remove("is-preloading");
         document.body.style.overflow = "";
-        if (lenis) lenis.start();
+        if (lenisRef.current) lenisRef.current.start();
         if (onComplete) onComplete();
         window.dispatchEvent(new CustomEvent("preloaderComplete"));
       }, 800);
