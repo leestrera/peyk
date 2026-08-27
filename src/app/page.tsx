@@ -19,7 +19,7 @@ import Footer from "@/components/Footer";
 
 export default function Home() {
   return (
-    <main className="relative w-full bg-background overflow-x-hidden [clip-path:inset(0)]">
+    <main className="relative w-full bg-background">
       <ScrollRestoration />
       <Preloader />
       <ScrollIndicator />

@@ -10,7 +10,7 @@ import Footer from "@/components/Footer";
 
 export default function AboutPage() {
   return (
-    <main className="relative w-full bg-[#09090b] min-h-screen overflow-x-hidden [clip-path:inset(0)]">
+    <main className="relative w-full bg-[#09090b] min-h-screen">
       {/* Global Cinematic Film Grain */}
       <div className="fixed inset-0 z-[9999] bg-noise pointer-events-none" />
       <ScrollRestoration />
