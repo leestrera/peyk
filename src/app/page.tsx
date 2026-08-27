@@ -15,10 +15,11 @@ import ScrollRestoration from "@/components/ScrollRestoration";
 import TemplatesShowcase from "@/components/TemplatesShowcase";
 import Preloader from "@/components/Preloader";
 import ScrollIndicator from "@/components/ScrollIndicator";
+import Footer from "@/components/Footer";
 
 export default function Home() {
   return (
-    <main className="relative w-full bg-background">
+    <main className="relative w-full bg-background overflow-x-hidden [clip-path:inset(0)]">
       <ScrollRestoration />
       <Preloader />
       <ScrollIndicator />
@@ -33,6 +34,7 @@ export default function Home() {
       <div><TemplatesShowcase /></div>
       <div><PurposeSection /></div>
       <div><ContactTerminal /></div>
+      <Footer theme="light" />
     </main>
   );
 }

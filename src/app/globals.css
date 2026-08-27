@@ -21,9 +21,15 @@
   --font-cursive: var(--font-alex), cursive;
 }
 
+html {
+  background-color: #09090b !important;
+  /* DO NOT add overflow here. It breaks iOS Safari viewport scaling. */
+}
+
 body {
-  background-color: var(--background);
+  background-color: #09090b;
   color: var(--foreground);
+  /* DO NOT add overflow here. It breaks iOS Safari viewport scaling. */
 }
 
 /* Base custom cursor hidden logic */
