@@ -83,7 +83,6 @@ export default function Preloader({ onComplete }: PreloaderProps) {
   useEffect(() => {
     const checkAutoplay = setTimeout(() => {
       if (videoRef.current && videoRef.current.currentTime === 0) {
-        // Autoplay failed, skip preloader immediately so the user isn't stuck
         if (!isExiting) handleFinish();
       }
     }, 800);
@@ -208,6 +207,13 @@ export default function Preloader({ onComplete }: PreloaderProps) {
       document.body.style.overflow = "hidden";
     }
     
+    // Force iOS Safari autoplay bypass
+    if (videoRef.current && !FREEZE_COMPARISON_MODE) {
+      videoRef.current.defaultMuted = true;
+      videoRef.current.muted = true;
+      videoRef.current.play().catch(() => {});
+    }
+
     if (FREEZE_COMPARISON_MODE && videoRef.current) {
       videoRef.current.currentTime = 3.9;
       videoRef.current.pause();
@@ -262,7 +268,6 @@ export default function Preloader({ onComplete }: PreloaderProps) {
           opacity: FREEZE_COMPARISON_MODE ? overlayOpacity / 100 : 1,
         }}
       >
-        {/* Hidden source video */}
         {/* Source video */}
         <video
           ref={videoRef}
@@ -272,16 +277,17 @@ export default function Preloader({ onComplete }: PreloaderProps) {
           preload="auto"
           autoPlay={!FREEZE_COMPARISON_MODE}
           onTimeUpdate={handleTimeUpdate}
-          className={`w-full h-auto max-h-[75vh] object-contain block !p-0 !m-0 ${canvasFailed ? "opacity-100" : "absolute opacity-0 w-px h-px pointer-events-none"}`}
-          style={canvasFailed ? { filter: "invert(1)" } : {}}
+          className={`w-full h-auto max-h-[75vh] object-contain block !p-0 !m-0 ${canvasFailed ? "opacity-100 relative" : "absolute opacity-0.01 pointer-events-none"}`}
+          style={canvasFailed ? { filter: "invert(1)" } : { opacity: 0.01 }}
         />
         {/* Transparent Canvas Renderer */}
         {!canvasFailed && (
           <canvas 
             ref={canvasRef} 
-            className="w-full h-auto max-h-[75vh] object-contain block !p-0 !m-0"
+            className="w-full h-auto max-h-[75vh] object-contain block !p-0 !m-0 relative z-10"
           />
         )}
+        
       </div>
 
       {/* Floating Tuning Dock */}
