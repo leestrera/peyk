@@ -1,14 +1,21 @@
 "use client";
 
-import { ReactLenis, useLenis } from 'lenis/react'
-import { useEffect, useRef } from 'react'
+import { ReactLenis } from 'lenis/react'
+import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
-import ScrollTrigger from 'gsap/ScrollTrigger'
 
 export default function SmoothScrolling({ children }: { children: React.ReactNode }) {
   const lenisRef = useRef<any>(null)
+  const [isTouchDevice, setIsTouchDevice] = useState(false)
 
   useEffect(() => {
+    const isTouch = window.matchMedia('(hover: none) and (pointer: coarse)').matches
+    setIsTouchDevice(isTouch)
+  }, [])
+
+  useEffect(() => {
+    if (isTouchDevice) return
+
     function update(time: number) {
       lenisRef.current?.lenis?.raf(time * 1000)
     }
@@ -19,17 +26,24 @@ export default function SmoothScrolling({ children }: { children: React.ReactNod
     return () => {
       gsap.ticker.remove(update)
     }
-  }, [])
+  }, [isTouchDevice])
 
+  // On mobile/touch: skip Lenis entirely.
+  // Lenis sets overflow:clip on <html> which causes black borders on iOS Safari.
+  // useLenis() in other components safely falls back to {} when no provider exists.
+  if (isTouchDevice) {
+    return <>{children}</>
+  }
+
+  // Desktop only: smooth scroll via Lenis
   return (
     <ReactLenis 
       root 
       ref={lenisRef} 
       autoRaf={false} 
       options={{ 
-        lerp: 0.05,            // Lower lerp makes the scroll feel slightly heavier/slower to settle
-        wheelMultiplier: 0.6,  // Reduces mouse wheel scroll speed by 40%
-        touchMultiplier: 1.0,  // Reduces mobile swipe scroll distance (default is 2)
+        lerp: 0.05,
+        wheelMultiplier: 0.6,
       }}
     >
       {children}
