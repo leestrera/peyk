@@ -1,7 +1,6 @@
  "use client";
 
 import { useRef, useState } from "react";
-import { usePathname } from "next/navigation";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -19,7 +18,6 @@ export default function ApertureHero() {
   const scrollIndicatorRef = useRef<HTMLDivElement>(null);
   const [isPatrolling, setIsPatrolling] = useState(true);
   const isPatrollingRef = useRef(true);
-  const pathname = usePathname();
 
   useGSAP(() => {
     const container = containerRef.current;
@@ -31,10 +29,7 @@ export default function ApertureHero() {
 
     if (!container || !text || !dot || !leftCurtain || !rightCurtain) return;
 
-    // 0. Aggressively clear any lingering inline styles from previous Next.js route cache mounts
-    gsap.set([dot, text, leftCurtain, rightCurtain, ".glow-overlay"], { clearProps: "all" });
-
-    // 1. Reset properties
+    // Reset properties
     gsap.set(dot, { scale: 1, opacity: 1, x: 0, y: 0 });
     gsap.set(text, { opacity: 1, scale: 1, y: 0 });
     gsap.set(".glow-overlay", { opacity: 0 });
@@ -124,7 +119,7 @@ export default function ApertureHero() {
       .to(leftCurtain, { xPercent: -100, duration: 2, ease: "power3.inOut" }, 2.5)
       .to(rightCurtain, { xPercent: 100, duration: 2, ease: "power3.inOut" }, 2.5);
 
-  }, { scope: containerRef, dependencies: [pathname] });
+  }, { scope: containerRef });
 
   return (
     <div className="relative w-full z-20 pointer-events-none">

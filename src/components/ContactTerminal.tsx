@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { usePathname } from "next/navigation";
 import { Terminal } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -14,7 +13,6 @@ export default function ContactTerminal() {
   const [isPatrolling, setIsPatrolling] = useState(false);
   const [resetTrigger, setResetTrigger] = useState(0);
   const hasResetRef = useRef(false);
-  const pathname = usePathname();
 
   const containerRef = useRef<HTMLDivElement>(null);
   const dotRef = useRef<HTMLSpanElement>(null);
@@ -25,12 +23,6 @@ export default function ContactTerminal() {
   useGSAP(() => {
     const container = containerRef.current;
     if (!container) return;
-
-    // 0. Aggressively clear any lingering inline styles from previous Next.js route cache mounts
-    if (bugRef.current) {
-      gsap.set(bugRef.current, { clearProps: "all" });
-    }
-    gsap.set([".void-word-1", ".void-word-2", ".void-word-3", ".contact-reveal"], { clearProps: "all" });
 
     let mm = gsap.matchMedia();
 
@@ -160,7 +152,7 @@ export default function ContactTerminal() {
         }, 1.7);
     });
 
-  }, { scope: containerRef, dependencies: [pathname] });
+  }, { scope: containerRef });
 
   return (
     <section id="contact" className="relative w-full bg-[#fbfbfb] z-20">
