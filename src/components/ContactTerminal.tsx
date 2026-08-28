@@ -160,6 +160,10 @@ export default function ContactTerminal() {
         }, 1.7);
     });
 
+    gsap.delayedCall(0.1, () => {
+      ScrollTrigger.refresh();
+    });
+
   }, { scope: containerRef, dependencies: [pathname] });
 
   return (

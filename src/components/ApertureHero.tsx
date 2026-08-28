@@ -124,6 +124,14 @@ export default function ApertureHero() {
       .to(leftCurtain, { xPercent: -100, duration: 2, ease: "power3.inOut" }, 2.5)
       .to(rightCurtain, { xPercent: 100, duration: 2, ease: "power3.inOut" }, 2.5);
 
+    // Fix for Next.js SPA Navigation race condition:
+    // When clicking a <Link>, Next.js takes a split second to reset window.scrollY to 0.
+    // If GSAP builds the timeline instantly, it uses the previous page's scroll position,
+    // causing the spider to start huge. Refreshing after 100ms guarantees it grabs the correct scrollY.
+    gsap.delayedCall(0.1, () => {
+      ScrollTrigger.refresh();
+    });
+
   }, { scope: containerRef, dependencies: [pathname] });
 
   return (
