@@ -1,6 +1,7 @@
  "use client";
 
 import { useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -18,6 +19,7 @@ export default function ApertureHero() {
   const scrollIndicatorRef = useRef<HTMLDivElement>(null);
   const [isPatrolling, setIsPatrolling] = useState(true);
   const isPatrollingRef = useRef(true);
+  const pathname = usePathname();
 
   useGSAP(() => {
     const container = containerRef.current;
@@ -122,7 +124,7 @@ export default function ApertureHero() {
       .to(leftCurtain, { xPercent: -100, duration: 2, ease: "power3.inOut" }, 2.5)
       .to(rightCurtain, { xPercent: 100, duration: 2, ease: "power3.inOut" }, 2.5);
 
-  }, { scope: containerRef });
+  }, { scope: containerRef, dependencies: [pathname] });
 
   return (
     <div className="relative w-full z-20 pointer-events-none">

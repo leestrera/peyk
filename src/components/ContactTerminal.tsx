@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { usePathname } from "next/navigation";
 import { Terminal } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -13,6 +14,7 @@ export default function ContactTerminal() {
   const [isPatrolling, setIsPatrolling] = useState(false);
   const [resetTrigger, setResetTrigger] = useState(0);
   const hasResetRef = useRef(false);
+  const pathname = usePathname();
 
   const containerRef = useRef<HTMLDivElement>(null);
   const dotRef = useRef<HTMLSpanElement>(null);
@@ -158,7 +160,7 @@ export default function ContactTerminal() {
         }, 1.7);
     });
 
-  }, { scope: containerRef });
+  }, { scope: containerRef, dependencies: [pathname] });
 
   return (
     <section id="contact" className="relative w-full bg-[#fbfbfb] z-20">
