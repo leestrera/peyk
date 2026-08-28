@@ -60,19 +60,22 @@ export default function GlassNavbar() {
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, targetPath: string) => {
     if (pathname === targetPath) {
-      if (!lenis) {
-        // iOS Safari / Touch Devices (Lenis Disabled):
-        // Prevent Next.js from routing. Instead, smoothly scroll to top natively.
-        // This allows GSAP ScrollTrigger to naturally reverse animations without jumping.
-        e.preventDefault();
+      // ALWAYS prevent default for same-page navigation on ALL devices.
+      // Next.js's built-in scroll restoration races with both Lenis and native scroll,
+      // causing GSAP ScrollTrigger to read a stale position and break pinned animations.
+      e.preventDefault();
+      
+      if (lenis) {
+        // Desktop: Lenis instant teleport. GSAP picks up position 0 on the next ticker frame.
+        lenis.scrollTo(0, { immediate: true });
+      } else {
+        // iOS Safari / Touch: Smooth native scroll so GSAP can reverse animations naturally.
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        return;
       }
-      // For Desktop/Lenis:
-      // DO NOT prevent default. Let Next.js jump, and we instantly sync Lenis below.
-      // Animating Lenis across pinned sections causes GSAP glitches, so we must jump.
+      return;
     }
 
+    // Different page navigation — jump to 0 before Next.js starts the route transition
     if (lenis) {
       lenis.scrollTo(0, { immediate: true });
     } else {
