@@ -17,17 +17,28 @@ export default function GlassNavbar() {
   const pathname = usePathname();
   const lenis = useLenis();
 
-  const handleNavClick = () => {
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, targetPath: string) => {
+    if (pathname === targetPath) {
+      // If we're already on this page, prevent Next.js from routing.
+      // This stops the abrupt jump and instead lets us scroll smoothly to the top,
+      // which allows GSAP ScrollTrigger to naturally reverse its animations (like shrinking the spider).
+      e.preventDefault();
+      
+      if (lenis) {
+        lenis.scrollTo(0, { immediate: false });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      return;
+    }
+
+    // If navigating to a DIFFERENT page, force scroll to top instantly
     if (lenis) {
       lenis.scrollTo(0, { immediate: true });
     }
-    // Force native scroll for iOS Safari (which disables Lenis)
     window.scrollTo(0, 0);
 
-    // CRITICAL: When clicking a link to the SAME page, Next.js doesn't remount components.
-    // It just jumps to the top. iOS Safari sometimes fails to fire a synchronous scroll event
-    // for programmatic jumps, leaving ScrollTrigger stuck thinking we are still at the bottom.
-    // We manually force ScrollTrigger to update its position after the jump.
+    // Force GSAP to sync with the jump
     setTimeout(() => {
       ScrollTrigger.update();
       ScrollTrigger.refresh();
@@ -204,7 +215,7 @@ export default function GlassNavbar() {
           <li className="w-full md:w-auto">
             <Link
               href="/"
-              onClick={handleNavClick}
+              onClick={(e) => handleNavClick(e, "/")}
               className={`block w-full text-center px-4 py-2 font-mono text-[10px] tracking-[0.2em] uppercase font-medium transition-all duration-300 rounded-full ${
                 pathname === "/" ? "text-white bg-white/10" : "text-white/40 hover:text-white"
               }`}
@@ -216,7 +227,7 @@ export default function GlassNavbar() {
           <li className="w-full md:w-auto">
             <Link
               href="/about"
-              onClick={handleNavClick}
+              onClick={(e) => handleNavClick(e, "/about")}
               className={`block w-full text-center px-4 py-2 font-mono text-[10px] tracking-[0.2em] uppercase font-medium transition-all duration-300 rounded-full ${
                 pathname === "/about" ? "text-white bg-white/10" : "text-white/40 hover:text-white"
               }`}
