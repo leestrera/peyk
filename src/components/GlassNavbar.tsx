@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useLenis } from 'lenis/react';
 import gsap from "gsap";
 
 export default function GlassNavbar() {
@@ -11,6 +12,13 @@ export default function GlassNavbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("");
   const pathname = usePathname();
+  const lenis = useLenis();
+
+  const handleNavClick = () => {
+    if (lenis) {
+      lenis.scrollTo(0, { immediate: true });
+    }
+  };
 
   const pullStringRef = useRef<HTMLDivElement>(null);
   const threadRef = useRef<HTMLDivElement>(null);
@@ -182,6 +190,7 @@ export default function GlassNavbar() {
           <li className="w-full md:w-auto">
             <Link
               href="/"
+              onClick={handleNavClick}
               className={`block w-full text-center px-4 py-2 font-mono text-[10px] tracking-[0.2em] uppercase font-medium transition-all duration-300 rounded-full ${
                 pathname === "/" ? "text-white bg-white/10" : "text-white/40 hover:text-white"
               }`}
@@ -193,6 +202,7 @@ export default function GlassNavbar() {
           <li className="w-full md:w-auto">
             <Link
               href="/about"
+              onClick={handleNavClick}
               className={`block w-full text-center px-4 py-2 font-mono text-[10px] tracking-[0.2em] uppercase font-medium transition-all duration-300 rounded-full ${
                 pathname === "/about" ? "text-white bg-white/10" : "text-white/40 hover:text-white"
               }`}
