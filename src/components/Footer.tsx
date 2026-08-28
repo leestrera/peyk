@@ -80,8 +80,8 @@ export default function Footer({ theme = 'dark' }: FooterProps) {
           
           <div className="flex flex-col gap-4 md:gap-3 items-start md:items-end">
             <div className="flex gap-6">
-              <span className="hover:opacity-75 cursor-pointer transition-opacity">Privacy Policy</span>
-              <span className="hover:opacity-75 cursor-pointer transition-opacity">Terms of Service</span>
+              <Link href="/privacy" className="hover:opacity-75 cursor-pointer transition-opacity">Privacy Policy</Link>
+              <Link href="/terms" className="hover:opacity-75 cursor-pointer transition-opacity">Terms of Service</Link>
             </div>
             <p>© {new Date().getFullYear()} PEYK. SYS.VER.01.2026</p>
           </div>
