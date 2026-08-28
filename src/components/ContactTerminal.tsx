@@ -33,8 +33,7 @@ export default function ContactTerminal() {
       let { isDesktop } = context.conditions as any;
 
       if (!isDesktop) {
-        // MOBILE: Pin for intro sequence, then unpin and scroll naturally
-        
+        // MOBILE: Pin for intro sequence
         const mobileTl = gsap.timeline({
           scrollTrigger: {
             trigger: container,
@@ -42,7 +41,7 @@ export default function ContactTerminal() {
             end: "+=1000",    // Pin duration
             scrub: 1,
             pin: true,        // Pin it so the intro stays on screen
-            anticipatePin: 1,
+            pinType: "fixed", // Force fixed positioning on mobile to avoid transform drift
             onUpdate: (self) => {
               if (self.progress >= 0.99) setIsPatrolling(true);
               else setIsPatrolling(false);
@@ -60,36 +59,39 @@ export default function ContactTerminal() {
             },
           }
         });
-
+        
         mobileTl
           // 1. Void Text fades in and out
-          .to(".void-word-1", { opacity: 1, y: 0, duration: 0.15 }, 0)
-          .to(".void-word-2", { opacity: 1, y: 0, duration: 0.15 }, 0.15)
-          .to(".void-word-3", { opacity: 1, y: 0, duration: 0.15 }, 0.3)
-          .to(".dark-void-text", { opacity: 0, duration: 0.2 }, 0.6)
+          .to(".void-word-1", { opacity: 1, y: 0, duration: 0.15, ease: "power3.out" }, 0)
+          .to(".void-word-2", { opacity: 1, y: 0, duration: 0.15, ease: "power3.out" }, 0.15)
+          .to(".void-word-3", { opacity: 1, y: 0, duration: 0.15, ease: "power3.out" }, 0.3)
+          .to(".dark-void-text", { opacity: 0, duration: 0.25, ease: "power2.in" }, 0.55)
           
-          // 2. Spider iris reveal & Black overlay fade out
+          // 2. Spider iris reveal — scale down first, THEN fade overlay
+          .fromTo(bugRef.current,
+            { scale: 8 },
+            { scale: 1, duration: 0.4, ease: "power3.inOut", force3D: false },
+            0.65
+          )
           .fromTo(".contact-black-overlay", 
             { opacity: 1 },
-            { opacity: 0, duration: 0.3, ease: "power2.inOut" }, 
-            0.7
-          )
-          .fromTo(bugRef.current,
-            { scale: 150 },
-            { scale: 1, duration: 0.3, ease: "power2.inOut", force3D: false },
-            0.7
+            { opacity: 0, duration: 0.35, ease: "power2.out" }, 
+            0.75
           )
           
-          // 3. Form and title fade in together
+          // 3. Form and title fade in together (slightly delayed for cinematic pacing)
           .to(".contact-reveal", {
             opacity: 1,
             y: 0,
             duration: 0.3,
-            stagger: 0.05,
+            stagger: 0.04,
             ease: "power2.out"
-          }, 0.7);
+          }, 0.85);
         
-        return;
+        // Clean up mobile timeline on unmount
+        return () => {
+          mobileTl.kill();
+        };
       }
 
       // DESKTOP: Full cinematic pinned sequence
@@ -124,32 +126,37 @@ export default function ContactTerminal() {
       });
 
       // 1. Dark Void Typography Sequence
-      tl.to(".void-word-1", { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 0)
-        .to(".void-word-2", { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 0.2)
-        .to(".void-word-3", { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 0.4)
+      tl.to(".void-word-1", { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 0)
+        .to(".void-word-2", { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 0.2)
+        .to(".void-word-3", { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 0.4)
         
         // Fade void text out
-        .to(".dark-void-text", { opacity: 0, duration: 0.5, ease: "power2.inOut" }, 1.2)
+        .to(".dark-void-text", { opacity: 0, duration: 0.5, ease: "power2.in" }, 1.2)
 
-        // 2. Spider iris reveal
+        // 2. Spider iris reveal — scale contracts first, then overlay dissolves
+        .fromTo(bugRef.current,
+          { scale: 15 },
+          { scale: 1, duration: 1.0, ease: "power3.inOut", force3D: false },
+          1.6
+        )
         .fromTo(".contact-black-overlay", 
           { opacity: 1 },
-          { opacity: 0, duration: 0.8, ease: "power2.inOut" }, 
-          1.7
-        )
-        .fromTo(bugRef.current,
-          { scale: 150 },
-          { scale: 1, duration: 0.8, ease: "power2.inOut", force3D: false },
-          1.7
+          { opacity: 0, duration: 0.8, ease: "power2.out" }, 
+          1.8
         )
         
-        // 3. Reveal contact content
+        // 3. Reveal contact content (staggered for editorial elegance)
         .to(".contact-reveal", {
           opacity: 1,
           y: 0,
           duration: 0.8,
+          stagger: 0.06,
           ease: "power2.out"
-        }, 1.7);
+        }, 2.0);
+    });
+
+    gsap.delayedCall(0.5, () => {
+      ScrollTrigger.refresh();
     });
 
   }, { scope: containerRef });
@@ -157,11 +164,14 @@ export default function ContactTerminal() {
   return (
     <section id="contact" className="relative w-full bg-[#fbfbfb] z-20">
       
+      {/* Section-level dark backdrop — covers the seam between PurposeSection gradient and this section */}
+      <div className="absolute top-0 left-0 w-full h-24 bg-[#09090b] z-[1] pointer-events-none" />
+
       {/* The Cinematic Terminal Sequence */}
-      <div ref={containerRef} className="relative w-full min-h-screen lg:h-[100vh] px-4 md:px-6 flex flex-col pt-24 pb-12 lg:py-0 lg:justify-center overflow-x-hidden lg:overflow-hidden">
+      <div ref={containerRef} className="relative w-full min-h-screen lg:h-[100vh] px-4 md:px-6 flex flex-col pt-24 pb-12 lg:py-0 lg:justify-center overflow-x-hidden lg:overflow-hidden z-[2]">
         
         {/* Full screen overlay to cover extreme corners during the scale reveal */}
-        <div className="contact-black-overlay absolute top-0 left-0 w-full h-[100vh] lg:h-full lg:inset-0 z-[40] bg-[#09090b] pointer-events-none" />
+        <div className="contact-black-overlay absolute top-0 left-0 w-full h-full lg:inset-0 z-[40] bg-[#09090b] pointer-events-none" />
 
         {/* The Dark Void Typography Sequence */}
         <div className="dark-void-text absolute top-0 left-0 w-full h-[100vh] lg:h-full lg:inset-0 z-[60] flex flex-col items-center justify-center pointer-events-none px-6">

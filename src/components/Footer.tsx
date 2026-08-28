@@ -13,7 +13,7 @@ export default function Footer({ theme = 'dark' }: FooterProps) {
       isLight ? 'bg-[#fbfbfb] text-zinc-900' : 'bg-transparent text-white'
     }`}>
       
-      <div className="mx-auto w-full px-6 md:px-12 pt-20 md:pt-32 pb-8 max-w-[1600px] flex flex-col justify-between">
+      <div className="mx-auto w-full px-6 md:px-12 pt-20 md:pt-32 pb-24 md:pb-8 max-w-[1600px] flex flex-col justify-between">
         
         {/* Top Section: Information Grid */}
         <div className="flex flex-col lg:flex-row justify-between items-start gap-12 md:gap-16 mb-8 md:mb-16">

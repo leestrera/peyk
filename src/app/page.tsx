@@ -34,7 +34,7 @@ export default function Home() {
       <div><TemplatesShowcase /></div>
       <div><PurposeSection /></div>
       <div><ContactTerminal /></div>
-      <Footer theme="light" />
+      <Footer theme="dark" />
     </main>
   );
 }

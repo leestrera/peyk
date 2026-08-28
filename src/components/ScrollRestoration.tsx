@@ -29,18 +29,35 @@ export default function ScrollRestoration() {
     // We must use a ResizeObserver on the document body to force GSAP to recalculate 
     // all trigger positions whenever the physical DOM height changes.
     let refreshTimeout: NodeJS.Timeout;
-    const bodyObserver = new ResizeObserver(() => {
-      clearTimeout(refreshTimeout);
-      refreshTimeout = setTimeout(() => {
-        ScrollTrigger.refresh();
-      }, 100); // 100ms debounce
+    let lastHeight = document.body.offsetHeight;
+    
+    const bodyObserver = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        const newHeight = entry.contentRect.height;
+        // Ignore small height changes (like iOS Safari address bar collapsing ~50-100px)
+        if (Math.abs(newHeight - lastHeight) > 150) {
+          lastHeight = newHeight;
+          clearTimeout(refreshTimeout);
+          refreshTimeout = setTimeout(() => {
+            ScrollTrigger.refresh();
+          }, 100); // 100ms debounce
+        }
+      }
     });
     bodyObserver.observe(document.body);
+
+    // FIX: Chrome DevTools Mobile Emulation and heavy dynamic imports (next/dynamic)
+    // can cause the DOM to shift significantly AFTER the initial mount.
+    // By cascading refreshes during the first 2 seconds, we guarantee GSAP locks into the correct layout.
+    const loadTimeouts = [100, 500, 1000, 2000].map(time => 
+      setTimeout(() => ScrollTrigger.refresh(), time)
+    );
 
     return () => {
       ScrollTrigger.removeEventListener("refreshInit", sortTriggers);
       bodyObserver.disconnect();
       clearTimeout(refreshTimeout);
+      loadTimeouts.forEach(clearTimeout);
     };
   }, []);
 

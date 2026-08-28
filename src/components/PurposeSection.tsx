@@ -104,7 +104,7 @@ export default function PurposeSection() {
       </div>
 
       {/* Seamless Transition into Contact Section */}
-      <div className="absolute bottom-0 left-0 w-full h-48 bg-gradient-to-b from-transparent to-black z-20 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-full h-72 bg-gradient-to-b from-transparent via-black/50 to-black z-20 pointer-events-none" />
     </section>
   );
 }

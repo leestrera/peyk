@@ -119,6 +119,10 @@ export default function ApertureHero() {
       .to(leftCurtain, { xPercent: -100, duration: 2, ease: "power3.inOut" }, 2.5)
       .to(rightCurtain, { xPercent: 100, duration: 2, ease: "power3.inOut" }, 2.5);
 
+    gsap.delayedCall(0.5, () => {
+      ScrollTrigger.refresh();
+    });
+
   }, { scope: containerRef });
 
   return (
