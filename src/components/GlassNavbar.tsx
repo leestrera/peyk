@@ -17,34 +17,6 @@ export default function GlassNavbar() {
   const pathname = usePathname();
   const lenis = useLenis();
 
-  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, targetPath: string) => {
-    if (pathname === targetPath) {
-      if (!lenis) {
-        // iOS Safari / Touch Devices (Lenis Disabled):
-        // Prevent Next.js from routing. Instead, smoothly scroll to top natively.
-        // This allows GSAP ScrollTrigger to naturally reverse animations without jumping.
-        e.preventDefault();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        return;
-      }
-      // For Desktop/Lenis:
-      // DO NOT prevent default. Let Next.js jump, and we instantly sync Lenis below.
-      // Animating Lenis across pinned sections causes GSAP glitches, so we must jump.
-    }
-
-    if (lenis) {
-      lenis.scrollTo(0, { immediate: true });
-    } else {
-      window.scrollTo(0, 0);
-    }
-
-    // Force GSAP to sync with the jump
-    setTimeout(() => {
-      ScrollTrigger.update();
-      ScrollTrigger.refresh();
-    }, 50);
-  };
-
   const pullStringRef = useRef<HTMLDivElement>(null);
   const threadRef = useRef<HTMLDivElement>(null);
   
@@ -85,6 +57,28 @@ export default function GlassNavbar() {
       observer.disconnect();
     };
   }, []);
+
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, targetPath: string) => {
+    if (pathname === targetPath) {
+      if (!lenis) {
+        // iOS Safari / Touch Devices (Lenis Disabled):
+        // Prevent Next.js from routing. Instead, smoothly scroll to top natively.
+        // This allows GSAP ScrollTrigger to naturally reverse animations without jumping.
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      // For Desktop/Lenis:
+      // DO NOT prevent default. Let Next.js jump, and we instantly sync Lenis below.
+      // Animating Lenis across pinned sections causes GSAP glitches, so we must jump.
+    }
+
+    if (lenis) {
+      lenis.scrollTo(0, { immediate: true });
+    } else {
+      window.scrollTo(0, 0);
+    }
+  };
 
   // Pendulum Physics loop
   useEffect(() => {
@@ -215,7 +209,6 @@ export default function GlassNavbar() {
           <li className="w-full md:w-auto">
             <Link
               href="/"
-              onClick={(e) => handleNavClick(e, "/")}
               className={`block w-full text-center px-4 py-2 font-mono text-[10px] tracking-[0.2em] uppercase font-medium transition-all duration-300 rounded-full ${
                 pathname === "/" ? "text-white bg-white/10" : "text-white/40 hover:text-white"
               }`}
@@ -227,7 +220,6 @@ export default function GlassNavbar() {
           <li className="w-full md:w-auto">
             <Link
               href="/about"
-              onClick={(e) => handleNavClick(e, "/about")}
               className={`block w-full text-center px-4 py-2 font-mono text-[10px] tracking-[0.2em] uppercase font-medium transition-all duration-300 rounded-full ${
                 pathname === "/about" ? "text-white bg-white/10" : "text-white/40 hover:text-white"
               }`}
