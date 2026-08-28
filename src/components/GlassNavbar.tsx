@@ -6,6 +6,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLenis } from 'lenis/react';
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function GlassNavbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -20,6 +23,15 @@ export default function GlassNavbar() {
     }
     // Force native scroll for iOS Safari (which disables Lenis)
     window.scrollTo(0, 0);
+
+    // CRITICAL: When clicking a link to the SAME page, Next.js doesn't remount components.
+    // It just jumps to the top. iOS Safari sometimes fails to fire a synchronous scroll event
+    // for programmatic jumps, leaving ScrollTrigger stuck thinking we are still at the bottom.
+    // We manually force ScrollTrigger to update its position after the jump.
+    setTimeout(() => {
+      ScrollTrigger.update();
+      ScrollTrigger.refresh();
+    }, 50);
   };
 
   const pullStringRef = useRef<HTMLDivElement>(null);
