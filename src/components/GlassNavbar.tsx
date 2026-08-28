@@ -201,25 +201,18 @@ export default function GlassNavbar() {
               About Us
             </Link>
           </li>
-          <li className="w-full md:w-auto">
-            <Link
-              href="/#contact"
-              className={`block w-full text-center px-4 py-2 font-mono text-[10px] tracking-[0.2em] uppercase font-medium transition-all duration-300 rounded-full text-white/40 hover:text-white`}
-              data-magnetic
-            >
-              Contact Us
-            </Link>
-          </li>
+
         </ul>
 
         {/* Action Button Section */}
         <div className="pl-2 pr-1 pb-1.5 md:pb-0 w-full md:w-auto block border-t md:border-t-0 border-white/10 pt-3 md:pt-0">
-          <button
-            className="w-full md:w-auto rounded-full px-6 py-3 md:py-2.5 font-mono text-[10px] tracking-[0.25em] uppercase font-bold transition-transform duration-300 bg-white text-black hover:scale-105 active:scale-95"
+          <Link
+            href="/contact"
+            className="block w-full md:w-auto text-center rounded-full px-6 py-3 md:py-2.5 font-mono text-[10px] tracking-[0.25em] uppercase font-bold transition-transform duration-300 bg-white text-black hover:scale-105 active:scale-95"
             data-magnetic
           >
             Connect
-          </button>
+          </Link>
         </div>
       </nav>
     </header>
