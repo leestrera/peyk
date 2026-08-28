@@ -18,6 +18,8 @@ export default function GlassNavbar() {
     if (lenis) {
       lenis.scrollTo(0, { immediate: true });
     }
+    // Force native scroll for iOS Safari (which disables Lenis)
+    window.scrollTo(0, 0);
   };
 
   const pullStringRef = useRef<HTMLDivElement>(null);
