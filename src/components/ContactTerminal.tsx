@@ -24,6 +24,12 @@ export default function ContactTerminal() {
     const container = containerRef.current;
     if (!container) return;
 
+    // 0. Aggressively clear any lingering inline styles from previous Next.js route cache mounts
+    if (bugRef.current) {
+      gsap.set(bugRef.current, { clearProps: "all" });
+    }
+    gsap.set([".void-word-1", ".void-word-2", ".void-word-3", ".contact-reveal"], { clearProps: "all" });
+
     let mm = gsap.matchMedia();
 
     mm.add({

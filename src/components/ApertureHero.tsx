@@ -29,7 +29,10 @@ export default function ApertureHero() {
 
     if (!container || !text || !dot || !leftCurtain || !rightCurtain) return;
 
-    // Reset properties
+    // 0. Aggressively clear any lingering inline styles from previous Next.js route cache mounts
+    gsap.set([dot, text, leftCurtain, rightCurtain, ".glow-overlay"], { clearProps: "all" });
+
+    // 1. Reset properties
     gsap.set(dot, { scale: 1, opacity: 1, x: 0, y: 0 });
     gsap.set(text, { opacity: 1, scale: 1, y: 0 });
     gsap.set(".glow-overlay", { opacity: 0 });
