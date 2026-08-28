@@ -18,19 +18,27 @@ const PRELOADER_CONTAINER_MAX_WIDTH = "1147px";
 const PRELOADER_PLAYBACK_SPEED = 1.0;
 // =========================================================================
 
+let globalPreloaderPlayed = false;
+
 interface PreloaderProps {
   onComplete?: () => void;
 }
 
 export default function Preloader({ onComplete }: PreloaderProps) {
   const [isExiting, setIsExiting] = useState(false);
-  const [isDone, setIsDone] = useState(false);
+  const [isDone, setIsDone] = useState(() => {
+    if (typeof window !== 'undefined' && !FREEZE_COMPARISON_MODE) {
+      return globalPreloaderPlayed;
+    }
+    return false;
+  });
   const [canvasFailed, setCanvasFailed] = useState(false);
   const [showFallbackButton, setShowFallbackButton] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const lenis = useLenis();
   const lenisRef = useRef(lenis);
   
+  // Ensure lenis is attached
   useEffect(() => {
     lenisRef.current = lenis;
   }, [lenis]);
@@ -49,6 +57,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
   const handleFinish = () => {
     if (FREEZE_COMPARISON_MODE || isExiting || isDone) return;
     setIsExiting(true);
+    globalPreloaderPlayed = true;
     setTimeout(() => {
       setIsDone(true);
       document.body.classList.remove("is-preloading");
@@ -202,7 +211,8 @@ export default function Preloader({ onComplete }: PreloaderProps) {
   }, [isExiting]);
 
   useEffect(() => {
-    if (!FREEZE_COMPARISON_MODE) {
+    // Only lock scrolling if we are actively showing the preloader
+    if (!FREEZE_COMPARISON_MODE && !isDone && !globalPreloaderPlayed) {
       document.body.classList.add("is-preloading");
       document.body.style.overflow = "hidden";
     }
@@ -226,7 +236,10 @@ export default function Preloader({ onComplete }: PreloaderProps) {
   }, []);
 
   useEffect(() => {
-    if (lenis && !FREEZE_COMPARISON_MODE && !isExiting && !isDone) {
+    if (!lenis || FREEZE_COMPARISON_MODE) return;
+    if (isExiting || isDone) {
+      lenis.start();
+    } else {
       lenis.stop();
     }
   }, [lenis, isExiting, isDone]);
@@ -235,6 +248,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
     if (!videoRef.current || FREEZE_COMPARISON_MODE) return;
     if (videoRef.current.currentTime >= 3.9) {
       setIsExiting(true);
+      globalPreloaderPlayed = true;
       setTimeout(() => {
         setIsDone(true);
         document.body.classList.remove("is-preloading");
