@@ -19,24 +19,24 @@ export default function GlassNavbar() {
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, targetPath: string) => {
     if (pathname === targetPath) {
-      // If we're already on this page, prevent Next.js from routing.
-      // This stops the abrupt jump and instead lets us scroll smoothly to the top,
-      // which allows GSAP ScrollTrigger to naturally reverse its animations (like shrinking the spider).
-      e.preventDefault();
-      
-      if (lenis) {
-        lenis.scrollTo(0, { immediate: false });
-      } else {
+      if (!lenis) {
+        // iOS Safari / Touch Devices (Lenis Disabled):
+        // Prevent Next.js from routing. Instead, smoothly scroll to top natively.
+        // This allows GSAP ScrollTrigger to naturally reverse animations without jumping.
+        e.preventDefault();
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
       }
-      return;
+      // For Desktop/Lenis:
+      // DO NOT prevent default. Let Next.js jump, and we instantly sync Lenis below.
+      // Animating Lenis across pinned sections causes GSAP glitches, so we must jump.
     }
 
-    // If navigating to a DIFFERENT page, force scroll to top instantly
     if (lenis) {
       lenis.scrollTo(0, { immediate: true });
+    } else {
+      window.scrollTo(0, 0);
     }
-    window.scrollTo(0, 0);
 
     // Force GSAP to sync with the jump
     setTimeout(() => {
