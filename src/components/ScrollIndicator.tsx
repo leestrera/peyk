@@ -45,8 +45,13 @@ export default function ScrollIndicator() {
       setIsVisible(false);
       clearTimeout(scrollTimeout);
 
-      // Check if at bottom
-      const scrolledToBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 50;
+      // Check if at bottom or near bottom (85%+ of page).
+      // We check 85% because the ContactTerminal has a GSAP pinned section that
+      // freezes physical scrolling while scrubbing through the animation.
+      // Without this, the indicator reappears during the pin's idle period.
+      const scrollProgress = window.scrollY / (document.body.offsetHeight - window.innerHeight);
+      const scrolledToBottom = scrollProgress >= 0.85 || 
+        (window.innerHeight + window.scrollY >= document.body.offsetHeight - 50);
       setIsAtBottom(scrolledToBottom);
 
       // If not at bottom and preloading is done, set timeout to show indicator
