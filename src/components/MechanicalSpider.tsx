@@ -198,7 +198,7 @@ const MechanicalSpider = forwardRef<HTMLDivElement, MechanicalSpiderProps>(
             // We use the PREVIOUS coordinate to draw the line from
             const startX = currentXRef.current - actualDx;
             const startY = currentYRef.current;
-            
+
             line.style.left = `calc(50% + ${Math.min(startX, targetX)}vw)`;
             line.style.top = `calc(50% + ${startY}vw)`;
             line.style.height = "1px";
